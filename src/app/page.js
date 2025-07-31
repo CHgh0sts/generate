@@ -13,6 +13,7 @@ export default function Home() {
     color: '#000000',
     backgroundColor: '#ffffff',
     transparent: false,
+    dataMatrixSize: 'auto',
     errorCorrectionLevel: 'M',
     displayValue: true,
     fontSize: 20,
@@ -64,6 +65,18 @@ export default function Home() {
   const textPositions = [
     { value: 'bottom', label: 'Bas' },
     { value: 'top', label: 'Haut' },
+  ];
+
+  const dataMatrixSizes = [
+    { value: 'auto', label: 'Auto (basé sur le texte)' },
+    { value: '10', label: '10x10' },
+    { value: '12', label: '12x12' },
+    { value: '14', label: '14x14' },
+    { value: '16', label: '16x16' },
+    { value: '18', label: '18x18' },
+    { value: '20', label: '20x20' },
+    { value: '22', label: '22x22' },
+    { value: '24', label: '24x24' },
   ];
 
   useEffect(() => {
@@ -231,20 +244,40 @@ export default function Home() {
                 </label>
               </div>
 
-              {/* Marge */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Marge: {params.margin}px
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="20"
-                  value={params.margin}
-                  onChange={(e) => handleParamChange('margin', parseInt(e.target.value))}
-                  className="w-full"
-                />
-              </div>
+              {/* Marge (seulement si pas Data Matrix) */}
+              {params.type !== 'datamatrix' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Marge: {params.margin}px
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    value={params.margin}
+                    onChange={(e) => handleParamChange('margin', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+              )}
+
+              {/* Taille Data Matrix (seulement pour Data Matrix) */}
+              {params.type === 'datamatrix' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Taille de la matrice
+                  </label>
+                  <select
+                    value={params.dataMatrixSize}
+                    onChange={(e) => handleParamChange('dataMatrixSize', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    {dataMatrixSizes.map(size => (
+                      <option key={size.value} value={size.value}>{size.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Paramètres spécifiques aux QR codes */}
               {params.type === 'qrcode' && (
@@ -421,6 +454,8 @@ export default function Home() {
                 <div className="mb-2">/api/generate?value=123456789&type=code128&color=%23ff0000</div>
                 <div className="mb-2"># Data Matrix personnalisé:</div>
                 <div className="mb-2">/api/generate?value=Test&type=datamatrix&width=300&backgroundColor=%23f0f0f0</div>
+                <div className="mb-2"># Data Matrix 24x24 forcé:</div>
+                <div className="mb-2">/api/generate?value=ABC&type=datamatrix&dataMatrixSize=24</div>
                 <div className="mb-2"># QR Code transparent:</div>
                 <div>/api/generate?value=Transparent&type=qrcode&transparent=true&format=png</div>
               </div>

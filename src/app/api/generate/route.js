@@ -18,6 +18,7 @@ export async function GET(request) {
       color: '#000000',
       backgroundColor: '#ffffff',
       transparent: false, // fond transparent
+      dataMatrixSize: 'auto', // taille forcée pour Data Matrix
       errorCorrectionLevel: 'M', // L, M, Q, H (pour QR codes)
       displayValue: true, // afficher la valeur sous le code barres
       fontSize: 20,
@@ -37,6 +38,7 @@ export async function GET(request) {
     const color = searchParams.get('color') || defaults.color;
     const backgroundColor = searchParams.get('backgroundColor') || defaults.backgroundColor;
     const transparent = searchParams.get('transparent') === 'true';
+    const dataMatrixSize = searchParams.get('dataMatrixSize') || defaults.dataMatrixSize;
     const errorCorrectionLevel = searchParams.get('errorCorrectionLevel') || defaults.errorCorrectionLevel;
     const displayValue = searchParams.get('displayValue') !== 'false';
     const fontSize = parseInt(searchParams.get('fontSize')) || defaults.fontSize;
@@ -98,16 +100,22 @@ export async function GET(request) {
       const usableWidth = width;
       const usableHeight = height;
       
-      // Taille de grille basée sur la longueur du texte (Data Matrix standards: 10x10, 12x12, 14x14, 16x16, 18x18, 20x20, 22x22, 24x24)
+      // Taille de grille basée sur la longueur du texte ou forcée par l'utilisateur
       let gridSize;
-      if (value.length <= 3) gridSize = 10;
-      else if (value.length <= 6) gridSize = 12;
-      else if (value.length <= 10) gridSize = 14;
-      else if (value.length <= 16) gridSize = 16;
-      else if (value.length <= 25) gridSize = 18;
-      else if (value.length <= 36) gridSize = 20;
-      else if (value.length <= 44) gridSize = 22;
-      else gridSize = 24;
+      if (dataMatrixSize === 'auto') {
+        // Taille automatique basée sur la longueur du texte (Data Matrix standards: 10x10, 12x12, 14x14, 16x16, 18x18, 20x20, 22x22, 24x24)
+        if (value.length <= 3) gridSize = 10;
+        else if (value.length <= 6) gridSize = 12;
+        else if (value.length <= 10) gridSize = 14;
+        else if (value.length <= 16) gridSize = 16;
+        else if (value.length <= 25) gridSize = 18;
+        else if (value.length <= 36) gridSize = 20;
+        else if (value.length <= 44) gridSize = 22;
+        else gridSize = 24;
+      } else {
+        // Taille forcée par l'utilisateur
+        gridSize = parseInt(dataMatrixSize);
+      }
       
       const moduleSize = Math.max(1, Math.floor(Math.min(usableWidth, usableHeight) / gridSize));
       const actualSize = gridSize * moduleSize;
