@@ -20,7 +20,9 @@ export default function Home() {
     fontFamily: 'Arial, sans-serif',
     textAlign: 'center',
     textPosition: 'bottom',
-    textMargin: 2
+    textMargin: 2,
+    textPrefix: '',
+    textSuffix: ''
   });
 
   const [imageUrl, setImageUrl] = useState('');
@@ -348,6 +350,32 @@ export default function Home() {
                     <>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Préfixe du texte
+                        </label>
+                        <input
+                          type="text"
+                          value={params.textPrefix}
+                          onChange={(e) => handleParamChange('textPrefix', e.target.value)}
+                          placeholder="Préfixe (ex: REF: )"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Suffixe du texte
+                        </label>
+                        <input
+                          type="text"
+                          value={params.textSuffix}
+                          onChange={(e) => handleParamChange('textSuffix', e.target.value)}
+                          placeholder="Suffixe (ex: €, kg, etc.)"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Taille de police: {params.fontSize}px
                         </label>
                         <input
@@ -488,7 +516,11 @@ export default function Home() {
                 <div className="mb-2"># Data Matrix 24x24 forcé:</div>
                 <div className="mb-2">/api/generate?value=ABC&type=datamatrix&dataMatrixSize=24</div>
                 <div className="mb-2"># QR Code transparent:</div>
-                <div>/api/generate?value=Transparent&type=qrcode&transparent=true&format=png</div>
+                <div className="mb-2">/api/generate?value=Transparent&type=qrcode&transparent=true&format=png</div>
+                <div className="mb-2"># Code barres avec préfixe et suffixe:</div>
+                <div className="mb-2">/api/generate?value=123456&type=code128&textPrefix=REF:%20&textSuffix=%20€</div>
+                <div className="mb-2"># EAN avec suffixe kg:</div>
+                <div>/api/generate?value=1234567890123&type=ean13&textSuffix=%20kg</div>
               </div>
             </div>
           </div>

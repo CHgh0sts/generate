@@ -26,7 +26,9 @@ export async function GET(request) {
       fontFamily: 'Arial, sans-serif',
       textAlign: 'center',
       textPosition: 'bottom',
-      textMargin: 2
+      textMargin: 2,
+      textPrefix: '', // préfixe à ajouter avant le texte
+      textSuffix: ''  // suffixe à ajouter après le texte
     };
 
     // Récupération des paramètres
@@ -47,12 +49,17 @@ export async function GET(request) {
     const textAlign = searchParams.get('textAlign') || defaults.textAlign;
     const textPosition = searchParams.get('textPosition') || defaults.textPosition;
     const textMargin = parseInt(searchParams.get('textMargin')) || defaults.textMargin;
+    const textPrefix = searchParams.get('textPrefix') || defaults.textPrefix;
+    const textSuffix = searchParams.get('textSuffix') || defaults.textSuffix;
 
     // Assurer une police fiable pour la production
     const safeFonts = ['Arial', 'Helvetica', 'sans-serif', 'DejaVu Sans', 'Liberation Sans'];
     if (!safeFonts.some(font => fontFamily.includes(font))) {
       fontFamily = 'Arial, Helvetica, sans-serif';
     }
+
+    // Créer le texte à afficher (avec prefix/suffix) pour les codes-barres
+    const displayText = textPrefix + value + textSuffix;
 
     let buffer;
     let contentType;
@@ -193,6 +200,7 @@ export async function GET(request) {
             width: 2,
             height: height - (displayValue ? fontSize + textMargin * 2 : 0),
             displayValue: displayValue,
+            text: displayValue ? displayText : '',
             fontSize: fontSize,
             font: fontFamily,
             textAlign: textAlign,
@@ -213,6 +221,7 @@ export async function GET(request) {
             width: 2,
             height: height - (displayValue ? fontSize + textMargin * 2 : 0),
             displayValue: displayValue,
+            text: displayValue ? displayText : '',
             fontSize: fontSize,
             font: fontFamily,
             textAlign: textAlign,
@@ -243,6 +252,7 @@ export async function GET(request) {
             width: 2,
             height: height - (displayValue ? fontSize + textMargin * 2 : 0),
             displayValue: displayValue,
+            text: displayValue ? displayText : '',
             fontSize: fontSize,
             font: fontFamily,
             textAlign: textAlign,
@@ -263,6 +273,7 @@ export async function GET(request) {
           width: 2,
           height: height - (displayValue ? fontSize + textMargin * 2 : 0),
           displayValue: displayValue,
+          text: displayValue ? displayText : '',
           fontSize: fontSize,
           font: fontFamily,
           textAlign: textAlign,
