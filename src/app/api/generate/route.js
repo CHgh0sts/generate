@@ -32,7 +32,13 @@ export async function GET(request) {
       textPosition: 'bottom',
       textMargin: 2,
       textPrefix: '', // préfixe à ajouter avant le texte
-      textSuffix: ''  // suffixe à ajouter après le texte
+      textSuffix: '', // suffixe à ajouter après le texte
+      // Paramètres WiFi pour QR codes
+      wifiMode: false, // activer le mode WiFi
+      wifiSSID: '', // nom du réseau WiFi
+      wifiPassword: '', // mot de passe WiFi
+      wifiSecurity: 'WPA', // type de sécurité (WPA, WEP, nopass)
+      wifiHidden: false // réseau caché (true/false)
     };
 
     // Récupération des paramètres
@@ -54,6 +60,13 @@ export async function GET(request) {
     const textMargin = parseInt(searchParams.get('textMargin')) || defaults.textMargin;
     const textPrefix = searchParams.get('textPrefix') || defaults.textPrefix;
     const textSuffix = searchParams.get('textSuffix') || defaults.textSuffix;
+    
+    // Paramètres WiFi
+    const wifiMode = searchParams.get('wifiMode') === 'true' || defaults.wifiMode;
+    const wifiSSID = searchParams.get('wifiSSID') || defaults.wifiSSID;
+    const wifiPassword = searchParams.get('wifiPassword') || defaults.wifiPassword;
+    const wifiSecurity = searchParams.get('wifiSecurity') || defaults.wifiSecurity;
+    const wifiHidden = searchParams.get('wifiHidden') === 'true' || defaults.wifiHidden;
 
 
 
@@ -65,6 +78,22 @@ export async function GET(request) {
 
     if (type === 'qrcode') {
       // Génération QR Code
+      let qrValue = value;
+      
+      // Si le mode WiFi est activé, créer la chaîne WiFi
+      if (wifiMode && wifiSSID) {
+        // Format standard WiFi: WIFI:T:WPA;S:nom_reseau;P:mot_de_passe;H:false;;
+        const security = wifiSecurity || 'WPA';
+        const hidden = wifiHidden ? 'true' : 'false';
+        const password = wifiPassword || '';
+        
+        // Échapper les caractères spéciaux dans SSID et password
+        const escapedSSID = wifiSSID.replace(/[\\;,":]/g, '\\$&');
+        const escapedPassword = password.replace(/[\\;,":]/g, '\\$&');
+        
+        qrValue = `WIFI:T:${security};S:${escapedSSID};P:${escapedPassword};H:${hidden};;`;
+      }
+      
       const options = {
         width: width,
         margin: margin,
@@ -76,7 +105,7 @@ export async function GET(request) {
       };
 
       if (format === 'svg') {
-        let svgString = await QRCode.toString(value, { 
+        let svgString = await QRCode.toString(qrValue, { 
           ...options, 
           type: 'svg',
           scale: 4
@@ -92,7 +121,7 @@ export async function GET(request) {
         buffer = svgString;
         contentType = 'image/svg+xml';
       } else {
-        buffer = await QRCode.toBuffer(value, {
+        buffer = await QRCode.toBuffer(qrValue, {
           ...options,
           type: 'png'
         });

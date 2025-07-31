@@ -22,7 +22,13 @@ export default function Home() {
     textPosition: 'bottom',
     textMargin: 2,
     textPrefix: '',
-    textSuffix: ''
+    textSuffix: '',
+    // Paramètres WiFi
+    wifiMode: false,
+    wifiSSID: '',
+    wifiPassword: '',
+    wifiSecurity: 'WPA',
+    wifiHidden: false
   });
 
   const [imageUrl, setImageUrl] = useState('');
@@ -62,6 +68,12 @@ export default function Home() {
   const textPositions = [
     { value: 'bottom', label: 'Bas' },
     { value: 'top', label: 'Haut' },
+  ];
+
+  const wifiSecurityTypes = [
+    { value: 'WPA', label: 'WPA/WPA2' },
+    { value: 'WEP', label: 'WEP' },
+    { value: 'nopass', label: 'Aucune sécurité' },
   ];
 
   const dataMatrixSizes = [
@@ -309,20 +321,97 @@ export default function Home() {
 
               {/* Paramètres spécifiques aux QR codes */}
               {params.type === 'qrcode' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Niveau de correction d&apos;erreur
-                  </label>
-                  <select
-                    value={params.errorCorrectionLevel}
-                    onChange={(e) => handleParamChange('errorCorrectionLevel', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  >
-                    {errorLevels.map(level => (
-                      <option key={level.value} value={level.value}>{level.label}</option>
-                    ))}
-                  </select>
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Niveau de correction d&apos;erreur
+                    </label>
+                    <select
+                      value={params.errorCorrectionLevel}
+                      onChange={(e) => handleParamChange('errorCorrectionLevel', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                      {errorLevels.map(level => (
+                        <option key={level.value} value={level.value}>{level.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Mode WiFi */}
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="wifiMode"
+                      checked={params.wifiMode}
+                      onChange={(e) => handleParamChange('wifiMode', e.target.checked)}
+                      className="mr-2"
+                    />
+                    <label htmlFor="wifiMode" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Mode WiFi (Connexion automatique)
+                    </label>
+                  </div>
+
+                  {/* Champs WiFi */}
+                  {params.wifiMode && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Nom du réseau (SSID) *
+                        </label>
+                        <input
+                          type="text"
+                          value={params.wifiSSID}
+                          onChange={(e) => handleParamChange('wifiSSID', e.target.value)}
+                          placeholder="MonReseauWiFi"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Type de sécurité
+                        </label>
+                        <select
+                          value={params.wifiSecurity}
+                          onChange={(e) => handleParamChange('wifiSecurity', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        >
+                          {wifiSecurityTypes.map(security => (
+                            <option key={security.value} value={security.value}>{security.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {params.wifiSecurity !== 'nopass' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Mot de passe WiFi
+                          </label>
+                          <input
+                            type="password"
+                            value={params.wifiPassword}
+                            onChange={(e) => handleParamChange('wifiPassword', e.target.value)}
+                            placeholder="Mot de passe du réseau"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="wifiHidden"
+                          checked={params.wifiHidden}
+                          onChange={(e) => handleParamChange('wifiHidden', e.target.checked)}
+                          className="mr-2"
+                        />
+                        <label htmlFor="wifiHidden" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Réseau caché
+                        </label>
+                      </div>
+                    </>
+                  )}
+                </>
               )}
 
               {/* Paramètres spécifiques aux codes barres */}
@@ -502,7 +591,11 @@ export default function Home() {
                 <div className="mb-2"># Code barres avec préfixe et suffixe:</div>
                 <div className="mb-2">/api/generate?value=123456&type=code128&textPrefix=REF:%20&textSuffix=%20€</div>
                 <div className="mb-2"># EAN avec suffixe kg:</div>
-                <div>/api/generate?value=1234567890123&type=ean13&textSuffix=%20kg</div>
+                <div className="mb-2">/api/generate?value=1234567890123&type=ean13&textSuffix=%20kg</div>
+                <div className="mb-2"># QR Code WiFi WPA:</div>
+                <div className="mb-2">/api/generate?type=qrcode&wifiMode=true&wifiSSID=MonReseau&wifiPassword=motdepasse&wifiSecurity=WPA</div>
+                <div className="mb-2"># QR Code WiFi sans mot de passe:</div>
+                <div>/api/generate?type=qrcode&wifiMode=true&wifiSSID=ReseauPublic&wifiSecurity=nopass</div>
               </div>
             </div>
           </div>
