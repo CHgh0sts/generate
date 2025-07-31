@@ -577,7 +577,7 @@ export default function Home() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Exemples d&apos;utilisation
               </label>
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-3 font-mono text-sm text-gray-800 dark:text-gray-200">
+              <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-3 font-mono text-sm text-gray-800 dark:text-gray-200 overflow-x-auto break-all">
                 <div className="mb-2"># QR Code simple:</div>
                 <div className="mb-2">/api/generate?value=Hello&type=qrcode</div>
                 <div className="mb-2"># Code barres avec couleur:</div>
