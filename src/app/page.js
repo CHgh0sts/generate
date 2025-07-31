@@ -93,7 +93,7 @@ export default function Home() {
 
   const copyApiUrl = () => {
     navigator.clipboard.writeText(fullApiUrl);
-    alert('URL de l\'API copiée dans le presse-papier !');
+    alert('URL de l&apos;API copiée dans le presse-papier !');
   };
 
   const downloadImage = () => {
@@ -250,7 +250,7 @@ export default function Home() {
               {params.type === 'qrcode' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Niveau de correction d'erreur
+                    Niveau de correction d&apos;erreur
                   </label>
                   <select
                     value={params.errorCorrectionLevel}
@@ -366,9 +366,10 @@ export default function Home() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Aperçu</h2>
             
-            {/* Aperçu de l'image */}
+            {/* Aperçu de l&apos;image */}
             <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6 flex items-center justify-center min-h-[200px]">
               {imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={imageUrl}
                   alt="Code généré"
@@ -398,20 +399,20 @@ export default function Home() {
               </button>
             </div>
 
-            {/* URL de l'API */}
+            {/* URL de l&apos;API */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                URL de l'API
+                URL de l&apos;API
               </label>
               <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-3 font-mono text-sm text-gray-800 dark:text-gray-200 break-all">
                 {fullApiUrl || apiUrl}
               </div>
             </div>
 
-            {/* Exemple d'utilisation */}
+            {/* Exemple d&apos;utilisation */}
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Exemples d'utilisation
+                Exemples d&apos;utilisation
               </label>
               <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-3 font-mono text-sm text-gray-800 dark:text-gray-200">
                 <div className="mb-2"># QR Code simple:</div>
