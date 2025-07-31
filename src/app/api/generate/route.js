@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
 import { createCanvas } from 'canvas';
+import bwipjs from 'bwip-js';
 
 export async function GET(request) {
   try {
@@ -86,180 +87,88 @@ export async function GET(request) {
         contentType = 'image/png';
       }
     } else if (type === 'datamatrix') {
-      // Génération d'un Data Matrix plus réaliste
-      const canvas = createCanvas(width, height);
-      const ctx = canvas.getContext('2d');
+      // Génération d'un Data Matrix réel avec bwip-js (conforme aux standards ISO/IEC 16022)
       
-      // Remplir l'arrière-plan (seulement si pas transparent)
-      if (!transparent) {
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, width, height);
-      }
-      
-      // Pour Data Matrix, pas de marge (margin forcé à 0)
-      const usableWidth = width;
-      const usableHeight = height;
-      
-      // Taille de grille basée sur la longueur du texte ou forcée par l'utilisateur
-      let gridSize;
-      if (dataMatrixSize === 'auto') {
-        // Taille automatique basée sur la longueur du texte (Data Matrix standards: 10x10, 12x12, 14x14, 16x16, 18x18, 20x20, 22x22, 24x24)
-        if (value.length <= 3) gridSize = 10;
-        else if (value.length <= 6) gridSize = 12;
-        else if (value.length <= 10) gridSize = 14;
-        else if (value.length <= 16) gridSize = 16;
-        else if (value.length <= 25) gridSize = 18;
-        else if (value.length <= 36) gridSize = 20;
-        else if (value.length <= 44) gridSize = 22;
-        else gridSize = 24;
-      } else {
-        // Taille forcée par l'utilisateur
-        gridSize = parseInt(dataMatrixSize);
-      }
-      
-      const moduleSize = Math.max(1, Math.floor(Math.min(usableWidth, usableHeight) / gridSize));
-      const actualSize = gridSize * moduleSize;
-      
-      // Centrer le Data Matrix (sans marge)
-      const offsetX = (usableWidth - actualSize) / 2;
-      const offsetY = (usableHeight - actualSize) / 2;
-      
-      // Créer une fonction de hash pour générer un pattern pseudo-aléatoire mais déterministe
-      const simpleHash = (str, seed = 0) => {
-        let hash = seed;
-        for (let i = 0; i < str.length; i++) {
-          const char = str.charCodeAt(i);
-          hash = ((hash << 5) - hash + char) & 0xffffffff;
-        }
-        return Math.abs(hash);
+      // Configurer les options pour bwip-js
+      const bwipOptions = {
+        bcid: 'datamatrix',
+        text: value,
+        scale: 1,
+        // Pas de padding pour Data Matrix (marge forcée à 0)
+        padding: 0,
+        backgroundcolor: transparent ? undefined : backgroundColor,
+        color: color
       };
-      
-      // Générer le pattern du Data Matrix
-      ctx.fillStyle = color;
-      const dataMatrix = [];
-      
-      // Initialiser la matrice
-      for (let i = 0; i < gridSize; i++) {
-        dataMatrix[i] = new Array(gridSize).fill(false);
+
+      // Gérer la taille forcée des Data Matrix
+      if (dataMatrixSize !== 'auto') {
+        const forcedSize = parseInt(dataMatrixSize);
+        // Pour forcer une taille spécifique, on utilise les options rows/columns de bwip-js
+        bwipOptions.rows = forcedSize;
+        bwipOptions.columns = forcedSize;
       }
-      
-      // Créer les bordures caractéristiques du Data Matrix
-      // Bordure gauche et bas (lignes continues)
-      for (let i = 0; i < gridSize; i++) {
-        dataMatrix[i][0] = true; // Bordure gauche
-        dataMatrix[gridSize - 1][i] = true; // Bordure bas
-      }
-      
-      // Bordure droite et haut (pattern en pointillés)
-      for (let i = 0; i < gridSize; i += 2) {
-        if (i < gridSize - 1) {
-          dataMatrix[0][i + 1] = true; // Bordure haut
-        }
-        if (i < gridSize - 1) {
-          dataMatrix[i + 1][gridSize - 1] = true; // Bordure droite
-        }
-      }
-      
-      // Encoder les données de manière plus réaliste (simulation d'encodage Data Matrix)
-      // Convertir chaque caractère en binaire et créer un pattern dense
-      let binaryData = '';
-      for (let i = 0; i < value.length; i++) {
-        let charCode = value.charCodeAt(i);
-        binaryData += charCode.toString(2).padStart(8, '0');
-      }
-      
-      // Ajouter des bits de correction d'erreur simulés
-      const errorCorrectionBits = simpleHash(value).toString(2).padStart(32, '0');
-      binaryData += errorCorrectionBits;
-      
-      // Répéter les données si nécessaire pour remplir la matrice
-      while (binaryData.length < (gridSize - 4) * (gridSize - 4)) {
-        binaryData += binaryData;
-      }
-      
-      // Placer les données dans la matrice selon un pattern en zigzag (typique des Data Matrix)
-      let bitIndex = 0;
-      let direction = 1; // 1 pour monter, -1 pour descendre
-      
-      for (let col = 1; col < gridSize - 1; col++) {
-        if (col % 2 === 1) {
-          // Colonne impaire : monter
-          for (let row = gridSize - 2; row >= 1; row--) {
-            if (row !== 0 && col !== 0 && row !== gridSize - 1 && col !== gridSize - 1) {
-              if (bitIndex < binaryData.length) {
-                dataMatrix[row][col] = binaryData[bitIndex] === '1';
-                bitIndex++;
-              }
-            }
-          }
-        } else {
-          // Colonne paire : descendre
-          for (let row = 1; row < gridSize - 1; row++) {
-            if (row !== 0 && col !== 0 && row !== gridSize - 1 && col !== gridSize - 1) {
-              if (bitIndex < binaryData.length) {
-                dataMatrix[row][col] = binaryData[bitIndex] === '1';
-                bitIndex++;
-              }
-            }
-          }
-        }
-      }
-      
-      // Ajouter des patterns de synchronisation plus réalistes
-      // Marquer quelques cellules spécifiques pour la synchronisation
-      if (gridSize >= 12) {
-        const syncPositions = [
-          [6, 0], [7, 0], [0, 6], [0, 7],
-          [gridSize - 7, gridSize - 1], [gridSize - 6, gridSize - 1],
-          [gridSize - 1, gridSize - 7], [gridSize - 1, gridSize - 6]
-        ];
+
+      if (format === 'svg') {
+        // Générer le SVG avec bwip-js
+        let svgString = bwipjs.toSVG(bwipOptions);
         
-        syncPositions.forEach(([row, col]) => {
-          if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
-            dataMatrix[row][col] = true;
-          }
-        });
-      }
-      
-      // Dessiner la matrice sur le canvas
-      for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-          if (dataMatrix[i][j]) {
-            ctx.fillRect(
-              Math.round(offsetX + j * moduleSize),
-              Math.round(offsetY + i * moduleSize),
-              moduleSize,
-              moduleSize
+        // Extraire les dimensions du viewBox pour redimensionner
+        const viewBoxMatch = svgString.match(/viewBox="0 0 (\d+) (\d+)"/);
+        if (viewBoxMatch) {
+          const originalWidth = parseInt(viewBoxMatch[1]);
+          const originalHeight = parseInt(viewBoxMatch[2]);
+          
+          // Redimensionner le SVG à nos dimensions souhaitées
+          svgString = svgString.replace(
+            /width="\d+" height="\d+"/,
+            `width="${width}" height="${height}"`
+          );
+          
+          // Calculer le scaling pour maintenir le ratio
+          const scale = Math.min(width / originalWidth, height / originalHeight);
+          const scaledWidth = originalWidth * scale;
+          const scaledHeight = originalHeight * scale;
+          const offsetX = (width - scaledWidth) / 2;
+          const offsetY = (height - scaledHeight) / 2;
+          
+          // Encapsuler le contenu dans un groupe avec transformation
+          svgString = svgString.replace(
+            /<svg[^>]*>/,
+            `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`
+          );
+          
+          // Ajouter un fond si pas transparent
+          if (!transparent) {
+            svgString = svgString.replace(
+              /(<svg[^>]*>)/,
+              `$1<rect width="${width}" height="${height}" fill="${backgroundColor}"/>`
             );
           }
-        }
-      }
-      
-      if (format === 'svg') {
-        // Générer le SVG avec le même pattern
-        let svgContent = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
-        
-        // Ajouter le fond seulement si pas transparent
-        if (!transparent) {
-          svgContent += `<rect width="${width}" height="${height}" fill="${backgroundColor}"/>`;
+          
+          // Ajouter la transformation pour centrer et redimensionner
+          svgString = svgString.replace(
+            /(<svg[^>]*>(?:<rect[^>]*>)?)/,
+            `$1<g transform="translate(${offsetX}, ${offsetY}) scale(${scale})">`
+          );
+          svgString = svgString.replace('</svg>', '</g></svg>');
         }
         
-        // Ajouter les modules noirs
-        for (let i = 0; i < gridSize; i++) {
-          for (let j = 0; j < gridSize; j++) {
-            if (dataMatrix[i][j]) {
-              const x = Math.round(offsetX + j * moduleSize);
-              const y = Math.round(offsetY + i * moduleSize);
-              svgContent += `<rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="${color}"/>`;
-            }
-          }
+        // Gérer la transparence en supprimant les fonds blancs
+        if (transparent) {
+          svgString = svgString.replace(/fill="#ffffff"/gi, 'fill="transparent"');
+          svgString = svgString.replace(/fill="white"/gi, 'fill="transparent"');
         }
         
-        svgContent += '</svg>';
-        buffer = svgContent;
+        buffer = svgString;
         contentType = 'image/svg+xml';
       } else {
-        buffer = canvas.toBuffer('image/png');
+        // Générer le PNG avec bwip-js
+        buffer = await bwipjs.toBuffer({
+          ...bwipOptions,
+          // Utiliser une échelle raisonnable pour atteindre nos dimensions
+          scale: Math.max(1, Math.floor(Math.min(width, height) / 100))
+        });
+        
         contentType = 'image/png';
       }
     } else {
