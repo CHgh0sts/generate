@@ -17,7 +17,7 @@ export default function Home() {
     errorCorrectionLevel: 'M',
     displayValue: true,
     fontSize: 20,
-    fontFamily: 'DejaVu Sans Mono, Courier, monospace',
+
     textAlign: 'center',
     textPosition: 'bottom',
     textMargin: 2,
@@ -51,12 +51,7 @@ export default function Home() {
     { value: 'H', label: 'High (H)' },
   ];
 
-  const fontFamilies = [
-    { value: 'DejaVu Sans Mono, Courier, monospace', label: 'Monospace (Sûr)' },
-    { value: 'DejaVu Sans, Liberation Sans, sans-serif', label: 'Sans-serif (Sûr)' },
-    { value: 'DejaVu Serif, Liberation Serif, serif', label: 'Serif (Sûr)' },
-    { value: 'Courier New, Courier, monospace', label: 'Courier (Sûr)' },
-  ];
+
 
   const textAlignments = [
     { value: 'left', label: 'Gauche' },
@@ -388,20 +383,7 @@ export default function Home() {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Police
-                        </label>
-                        <select
-                          value={params.fontFamily}
-                          onChange={(e) => handleParamChange('fontFamily', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                          {fontFamilies.map(font => (
-                            <option key={font.value} value={font.value}>{font.label}</option>
-                          ))}
-                        </select>
-                      </div>
+
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>

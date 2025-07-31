@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import JsBarcode from 'jsbarcode';
-import { createCanvas } from 'canvas';
+import { createCanvas, registerFont } from 'canvas';
 import bwipjs from 'bwip-js';
+import path from 'path';
+
+// Enregistrer la police personnalisée
+const fontPath = path.join(process.cwd(), 'src/app/api/generate/font.ttf');
+registerFont(fontPath, { family: 'CustomFont' });
 
 export async function GET(request) {
   try {
@@ -23,7 +28,6 @@ export async function GET(request) {
       errorCorrectionLevel: 'M', // L, M, Q, H (pour QR codes)
       displayValue: true, // afficher la valeur sous le code barres
       fontSize: 20,
-      fontFamily: 'DejaVu Sans Mono, Courier, monospace',
       textAlign: 'center',
       textPosition: 'bottom',
       textMargin: 2,
@@ -45,16 +49,13 @@ export async function GET(request) {
     const errorCorrectionLevel = searchParams.get('errorCorrectionLevel') || defaults.errorCorrectionLevel;
     const displayValue = searchParams.get('displayValue') !== 'false';
     const fontSize = parseInt(searchParams.get('fontSize')) || defaults.fontSize;
-    let fontFamily = searchParams.get('fontFamily') || defaults.fontFamily;
     const textAlign = searchParams.get('textAlign') || defaults.textAlign;
     const textPosition = searchParams.get('textPosition') || defaults.textPosition;
     const textMargin = parseInt(searchParams.get('textMargin')) || defaults.textMargin;
     const textPrefix = searchParams.get('textPrefix') || defaults.textPrefix;
     const textSuffix = searchParams.get('textSuffix') || defaults.textSuffix;
 
-    // Assurer une police fiable pour la production - utiliser uniquement des polices système de base
-    // Forcer l'utilisation d'une police monospace basique qui existe sur tous les serveurs
-    fontFamily = 'DejaVu Sans Mono, Courier New, Courier, Liberation Mono, Consolas, monospace';
+
 
     // Créer le texte à afficher (avec prefix/suffix) pour les codes-barres
     const displayText = textPrefix + value + textSuffix;
@@ -187,8 +188,8 @@ export async function GET(request) {
       const canvas = createCanvas(width, height);
       const ctx = canvas.getContext('2d');
       
-      // Forcer l'utilisation d'une police système de base pour éviter les problèmes en production
-      ctx.font = '20px "Courier New", Courier, monospace';
+      // Utiliser la police personnalisée
+      ctx.font = `${fontSize}px CustomFont`;
       
       try {
         if (format === 'svg') {
@@ -204,7 +205,7 @@ export async function GET(request) {
             displayValue: displayValue,
             text: displayValue ? displayText : '',
             fontSize: fontSize,
-            font: 'Courier New, monospace',
+            font: 'CustomFont',
             textAlign: textAlign,
             textPosition: textPosition,
             textMargin: textMargin,
@@ -225,7 +226,7 @@ export async function GET(request) {
             displayValue: displayValue,
             text: displayValue ? displayText : '',
             fontSize: fontSize,
-            font: 'Courier New, monospace',
+            font: 'CustomFont',
             textAlign: textAlign,
             textPosition: textPosition,
             textMargin: textMargin,
@@ -256,7 +257,7 @@ export async function GET(request) {
             displayValue: displayValue,
             text: displayValue ? displayText : '',
             fontSize: fontSize,
-            font: 'Courier New, monospace',
+            font: 'CustomFont',
             textAlign: textAlign,
             textPosition: textPosition,
             textMargin: textMargin,
