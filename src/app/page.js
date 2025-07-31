@@ -28,7 +28,11 @@ export default function Home() {
     wifiSSID: '',
     wifiPassword: '',
     wifiSecurity: 'WPA',
-    wifiHidden: false
+    wifiHidden: false,
+    // Paramètres dégradé
+    gradientMode: false,
+    gradientColors: ['#000000', '#0066cc'],
+    gradientDirection: 'horizontal'
   });
 
   const [imageUrl, setImageUrl] = useState('');
@@ -77,6 +81,15 @@ export default function Home() {
     { value: 'nopass', label: 'Aucune sécurité' },
   ];
 
+  const gradientDirections = [
+    { value: 'horizontal', label: 'Horizontal (→)' },
+    { value: 'vertical', label: 'Vertical (↓)' },
+    { value: 'diagonal-lr', label: 'Diagonal ↘' },
+    { value: 'diagonal-rl', label: 'Diagonal ↙' },
+    { value: 'radial', label: 'Radial (○)' },
+    { value: 'conic', label: 'Conique (◐)' },
+  ];
+
   const dataMatrixSizes = [
     { value: 'auto', label: 'Auto (basé sur le texte)' },
     { value: '10', label: '10x10' },
@@ -93,9 +106,19 @@ export default function Home() {
     const urlParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        urlParams.append(key, value.toString());
+        if (key === 'gradientColors' && Array.isArray(value)) {
+          // Convertir le tableau de couleurs en string séparée par virgules
+          urlParams.append(key, value.join(','));
+        } else {
+          urlParams.append(key, value.toString());
+        }
       }
     });
+
+    // Forcer le format SVG si le mode dégradé est activé
+    if (params.gradientMode && params.format !== 'svg') {
+      urlParams.set('format', 'svg');
+    }
 
     const newApiUrl = `/api/generate?${urlParams.toString()}`;
     setApiUrl(newApiUrl);
@@ -113,6 +136,15 @@ export default function Home() {
         ...prev,
         [key]: value
       };
+
+      // Forcer le format SVG quand le mode dégradé est activé
+      if (key === 'gradientMode' && value === true) {
+        newParams.format = 'svg';
+      }
+      // Remettre PNG par défaut si on désactive le dégradé
+      else if (key === 'gradientMode' && value === false) {
+        newParams.format = 'png';
+      }
 
       // Ajuster automatiquement les dimensions selon le type de code
       if (key === 'type') {
@@ -143,6 +175,27 @@ export default function Home() {
 
       return newParams;
     });
+  };
+
+  const addGradientColor = () => {
+    setParams(prev => ({
+      ...prev,
+      gradientColors: [...prev.gradientColors, '#ff0000']
+    }));
+  };
+
+  const removeGradientColor = (index) => {
+    setParams(prev => ({
+      ...prev,
+      gradientColors: prev.gradientColors.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateGradientColor = (index, color) => {
+    setParams(prev => ({
+      ...prev,
+      gradientColors: prev.gradientColors.map((c, i) => i === index ? color : c)
+    }));
   };
 
   const copyApiUrl = () => {
@@ -206,16 +259,27 @@ export default function Home() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Format
+                  {params.gradientMode && (
+                    <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(Forcé: SVG)</span>
+                  )}
                 </label>
                 <select
-                  value={params.format}
+                  value={params.gradientMode ? 'svg' : params.format}
                   onChange={(e) => handleParamChange('format', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  disabled={params.gradientMode}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                    params.gradientMode ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   {formats.map(format => (
                     <option key={format.value} value={format.value}>{format.label}</option>
                   ))}
                 </select>
+                {params.gradientMode && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Le mode dégradé nécessite le format SVG
+                  </p>
+                )}
               </div>
 
               {/* Dimensions */}
@@ -244,32 +308,116 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Couleurs */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Couleur
-                  </label>
-                  <input
-                    type="color"
-                    value={params.color}
-                    onChange={(e) => handleParamChange('color', e.target.value)}
-                    className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Arrière-plan
-                  </label>
-                  <input
-                    type="color"
-                    value={params.backgroundColor}
-                    onChange={(e) => handleParamChange('backgroundColor', e.target.value)}
-                    className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={params.transparent}
-                  />
-                </div>
+              {/* Mode Dégradé */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="gradientMode"
+                  checked={params.gradientMode}
+                  onChange={(e) => handleParamChange('gradientMode', e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="gradientMode" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Mode Dégradé
+                </label>
               </div>
+
+              {/* Couleurs */}
+              {!params.gradientMode ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Couleur
+                    </label>
+                    <input
+                      type="color"
+                      value={params.color}
+                      onChange={(e) => handleParamChange('color', e.target.value)}
+                      className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Arrière-plan
+                    </label>
+                    <input
+                      type="color"
+                      value={params.backgroundColor}
+                      onChange={(e) => handleParamChange('backgroundColor', e.target.value)}
+                      className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={params.transparent}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Direction du dégradé
+                    </label>
+                    <select
+                      value={params.gradientDirection}
+                      onChange={(e) => handleParamChange('gradientDirection', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                      {gradientDirections.map(direction => (
+                        <option key={direction.value} value={direction.value}>{direction.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Couleurs du dégradé ({params.gradientColors.length})
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addGradientColor}
+                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        + Ajouter
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {params.gradientColors.map((color, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500 w-6">{index + 1}.</span>
+                          <input
+                            type="color"
+                            value={color}
+                            onChange={(e) => updateGradientColor(index, e.target.value)}
+                            className="flex-1 h-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          {params.gradientColors.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => removeGradientColor(index)}
+                              className="px-2 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Arrière-plan
+                    </label>
+                    <input
+                      type="color"
+                      value={params.backgroundColor}
+                      onChange={(e) => handleParamChange('backgroundColor', e.target.value)}
+                      className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={params.transparent}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Fond transparent */}
               <div className="flex items-center">
@@ -549,20 +697,41 @@ export default function Home() {
             <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Aperçu</h2>
             
             {/* Aperçu de l&apos;image */}
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6 flex items-center justify-center min-h-[200px]">
-              {imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageUrl}
-                  alt="Code généré"
-                  className="max-w-full max-h-[300px] object-contain"
-                  style={{ 
-                    backgroundColor: params.backgroundColor,
-                    padding: '10px',
-                    borderRadius: '4px'
-                  }}
-                />
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6 min-h-[200px]">
+              {params.gradientMode && (
+                <div className="mb-4 text-center">
+                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+                    Mode Dégradé (SVG)
+                  </span>
+                </div>
               )}
+              <div className="flex items-center justify-center">
+                {imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={imageUrl}
+                    alt="Code généré"
+                    className="max-w-full max-h-[300px] object-contain"
+                    style={{ 
+                      backgroundColor: !params.gradientMode ? params.backgroundColor : 'transparent',
+                      padding: '10px',
+                      borderRadius: '4px'
+                    }}
+                    onError={(e) => {
+                      console.error('Erreur de chargement de l\'image:', e);
+                      e.target.style.display = 'none';
+                    }}
+                    onLoad={() => {
+                      console.log('Image chargée avec succès:', imageUrl);
+                    }}
+                  />
+                ) : (
+                  <div className="text-center text-gray-500 dark:text-gray-400">
+                    <p>Aucun aperçu disponible</p>
+                    <p className="text-sm">Vérifiez vos paramètres</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Boutons d'action */}
@@ -614,7 +783,13 @@ export default function Home() {
                 <div className="mb-2"># QR Code WiFi WPA:</div>
                 <div className="mb-2">/api/generate?type=qrcode&wifiMode=true&wifiSSID=MonReseau&wifiPassword=motdepasse&wifiSecurity=WPA</div>
                 <div className="mb-2"># QR Code WiFi sans mot de passe:</div>
-                <div>/api/generate?type=qrcode&wifiMode=true&wifiSSID=ReseauPublic&wifiSecurity=nopass</div>
+                <div className="mb-2">/api/generate?type=qrcode&wifiMode=true&wifiSSID=ReseauPublic&wifiSecurity=nopass</div>
+                <div className="mb-2"># QR Code avec dégradé horizontal:</div>
+                <div className="mb-2">/api/generate?value=Hello&type=qrcode&gradientMode=true&gradientColors=%23000000,%23ff0000,%23ffff00&gradientDirection=horizontal&format=svg</div>
+                <div className="mb-2"># Code barres dégradé vertical:</div>
+                <div className="mb-2">/api/generate?value=123456&type=code128&gradientMode=true&gradientColors=%230066cc,%2300ffcc&gradientDirection=vertical&format=svg</div>
+                <div className="mb-2"># Data Matrix dégradé radial:</div>
+                <div>/api/generate?value=Test&type=datamatrix&gradientMode=true&gradientColors=%23ff6b35,%23f7931e,%23ffd700&gradientDirection=radial&format=svg</div>
               </div>
             </div>
           </div>

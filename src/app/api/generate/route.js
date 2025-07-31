@@ -89,6 +89,64 @@ function generateErrorImage(errorMessage, width = 400, height = 300, format = 'p
   }
 }
 
+// Fonction pour générer le dégradé selon la direction et les couleurs
+function generateGradient(gradientColors, gradientDirection, width, height) {
+  const colors = gradientColors.split(',').map(c => c.trim());
+  
+  // Créer les stops du dégradé
+  const stops = colors.map((color, index) => {
+    const position = index / (colors.length - 1) * 100;
+    return `${color} ${position}%`;
+  }).join(', ');
+  
+  let gradientDef = '';
+  let gradientId = 'gradient';
+  
+  switch (gradientDirection) {
+    case 'horizontal':
+      gradientDef = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</linearGradient>`;
+      break;
+    case 'vertical':
+      gradientDef = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="0%" y2="100%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</linearGradient>`;
+      break;
+    case 'diagonal-lr':
+      gradientDef = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</linearGradient>`;
+      break;
+    case 'diagonal-rl':
+      gradientDef = `<linearGradient id="${gradientId}" x1="100%" y1="0%" x2="0%" y2="100%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</linearGradient>`;
+      break;
+    case 'radial':
+      gradientDef = `<radialGradient id="${gradientId}" cx="50%" cy="50%" r="50%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</radialGradient>`;
+      break;
+    case 'conic':
+      // Pour SVG, on simule le conique avec un radial
+      gradientDef = `<radialGradient id="${gradientId}" cx="50%" cy="50%" r="50%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</radialGradient>`;
+      break;
+    default:
+      gradientDef = `<linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="0%">${colors.map((color, index) => 
+        `<stop offset="${index / (colors.length - 1) * 100}%" style="stop-color:${color}"/>`
+      ).join('')}</linearGradient>`;
+  }
+  
+  return {
+    gradientDef,
+    gradientId,
+    colors
+  };
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -118,7 +176,11 @@ export async function GET(request) {
       wifiSSID: '', // nom du réseau WiFi
       wifiPassword: '', // mot de passe WiFi
       wifiSecurity: 'WPA', // type de sécurité (WPA, WEP, nopass)
-      wifiHidden: false // réseau caché (true/false)
+      wifiHidden: false, // réseau caché (true/false)
+      // Paramètres dégradé
+      gradientMode: false, // activer le mode dégradé
+      gradientColors: '#000000,#0066cc', // couleurs du dégradé séparées par virgule
+      gradientDirection: 'horizontal' // direction du dégradé
     };
 
     // Récupération des paramètres
@@ -147,6 +209,11 @@ export async function GET(request) {
     const wifiPassword = searchParams.get('wifiPassword') || defaults.wifiPassword;
     const wifiSecurity = searchParams.get('wifiSecurity') || defaults.wifiSecurity;
     const wifiHidden = searchParams.get('wifiHidden') === 'true' || defaults.wifiHidden;
+    
+    // Paramètres dégradé
+    const gradientMode = searchParams.get('gradientMode') === 'true' || defaults.gradientMode;
+    const gradientColors = searchParams.get('gradientColors') || defaults.gradientColors;
+    const gradientDirection = searchParams.get('gradientDirection') || defaults.gradientDirection;
 
 
 
@@ -190,6 +257,27 @@ export async function GET(request) {
           type: 'svg',
           scale: 4
         });
+        
+        // Appliquer le dégradé si activé
+        if (gradientMode) {
+          const gradient = generateGradient(gradientColors, gradientDirection, width, height);
+          
+          // Ajouter la définition du dégradé dans l'SVG
+          svgString = svgString.replace(
+            /<svg([^>]*)>/,
+            `<svg$1><defs>${gradient.gradientDef}</defs>`
+          );
+          
+          // Remplacer la couleur unie par le dégradé (fill et stroke)
+          svgString = svgString.replace(
+            new RegExp(`fill="${color.replace('#', '\\#')}"`, 'g'),
+            `fill="url(#${gradient.gradientId})"`
+          );
+          svgString = svgString.replace(
+            new RegExp(`stroke="${color.replace('#', '\\#')}"`, 'g'),
+            `stroke="url(#${gradient.gradientId})"`
+          );
+        }
         
         // Pour SVG transparent, modifier la couleur de fond
         if (transparent) {
@@ -266,9 +354,30 @@ export async function GET(request) {
             );
           }
           
+          // Appliquer le dégradé si activé
+          if (gradientMode) {
+            const gradient = generateGradient(gradientColors, gradientDirection, width, height);
+            
+            // Ajouter la définition du dégradé dans l'SVG
+            svgString = svgString.replace(
+              /(<svg[^>]*>)/,
+              `$1<defs>${gradient.gradientDef}</defs>`
+            );
+            
+            // Remplacer la couleur unie par le dégradé (fill et stroke)
+            svgString = svgString.replace(
+              new RegExp(`fill="${color.replace('#', '\\#')}"`, 'g'),
+              `fill="url(#${gradient.gradientId})"`
+            );
+            svgString = svgString.replace(
+              new RegExp(`stroke="${color.replace('#', '\\#')}"`, 'g'),
+              `stroke="url(#${gradient.gradientId})"`
+            );
+          }
+          
           // Ajouter la transformation pour centrer et redimensionner
           svgString = svgString.replace(
-            /(<svg[^>]*>(?:<rect[^>]*>)?)/,
+            /(<svg[^>]*>(?:<rect[^>]*>)?(?:<defs[^>]*>.*?<\/defs>)?)/,
             `$1<g transform="translate(${offsetX}, ${offsetY}) scale(${scale})">`
           );
           svgString = svgString.replace('</svg>', '</g></svg>');
@@ -310,32 +419,7 @@ export async function GET(request) {
       
       try {
         if (format === 'svg') {
-          // Laisser JsBarcode générer directement le SVG
-          const svgCanvas = { 
-            svg: ''
-          };
-          
-          JsBarcode(svgCanvas, value, {
-            format: type.toUpperCase(),
-            width: 2,
-            height: height - (displayValue ? fontSize + textMargin * 2 : 0),
-            displayValue: displayValue,
-            text: displayValue ? displayText : '',
-            fontSize: fontSize,
-            font: 'CustomFont',
-            textAlign: textAlign,
-            textPosition: textPosition,
-            textMargin: textMargin,
-            background: transparent ? 'transparent' : backgroundColor,
-            lineColor: color,
-            margin: margin,
-            xmlDocument: svgCanvas,
-            width: width,
-            height: height
-          });
-          
-          // JsBarcode pour SVG nécessite une approche différente
-          // Utilisons une approche hybride : générer en PNG puis convertir
+          // Générer le code-barres sur canvas pour extraire les données
           JsBarcode(canvas, value, {
             format: type.toUpperCase(),
             width: 2,
@@ -352,15 +436,35 @@ export async function GET(request) {
             margin: margin
           });
           
-          // Convertir le canvas en SVG
-          const imageData = canvas.toDataURL();
+          // Convertir en SVG avec support du dégradé
           let svgContent = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`;
+          
+          // Ajouter les définitions de dégradé si nécessaire
+          if (gradientMode) {
+            const gradient = generateGradient(gradientColors, gradientDirection, width, height);
+            svgContent += `<defs>${gradient.gradientDef}</defs>`;
+          }
           
           if (!transparent) {
             svgContent += `<rect width="${width}" height="${height}" fill="${backgroundColor}"/>`;
           }
           
-          svgContent += `<image x="0" y="0" width="${width}" height="${height}" xlink:href="${imageData}"/>`;
+          if (gradientMode) {
+            // Créer un masque à partir du canvas et appliquer le dégradé
+            const imageData = canvas.toDataURL();
+            svgContent += `
+              <defs>
+                <mask id="barcodeMask">
+                  <image x="0" y="0" width="${width}" height="${height}" xlink:href="${imageData}"/>
+                </mask>
+              </defs>
+              <rect x="0" y="0" width="${width}" height="${height}" fill="url(#gradient)" mask="url(#barcodeMask)"/>`;
+          } else {
+            // Mode couleur normale
+            const imageData = canvas.toDataURL();
+            svgContent += `<image x="0" y="0" width="${width}" height="${height}" xlink:href="${imageData}"/>`;
+          }
+          
           svgContent += '</svg>';
           
           buffer = svgContent;

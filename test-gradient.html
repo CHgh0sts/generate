@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dégradé QR Code</title>
+</head>
+<body>
+    <h1>Test des Dégradés</h1>
+    <h2>QR Code avec dégradé horizontal (noir vers rouge)</h2>
+    <img src="http://localhost:3000/api/generate?value=Test&type=qrcode&gradientMode=true&gradientColors=%23000000,%23ff0000&gradientDirection=horizontal&format=svg" />
+    
+    <h2>QR Code avec dégradé vertical (3 couleurs)</h2>
+    <img src="http://localhost:3000/api/generate?value=MultiColor&type=qrcode&gradientMode=true&gradientColors=%23ff0000,%2300ff00,%230000ff&gradientDirection=vertical&format=svg" />
+    
+    <h2>Code-barres avec dégradé radial</h2>
+    <img src="http://localhost:3000/api/generate?value=123456789&type=code128&gradientMode=true&gradientColors=%23ff6b35,%23ffd700&gradientDirection=radial&format=svg" />
+</body>
+</html>
