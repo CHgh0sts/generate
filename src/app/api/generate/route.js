@@ -23,7 +23,7 @@ export async function GET(request) {
       errorCorrectionLevel: 'M', // L, M, Q, H (pour QR codes)
       displayValue: true, // afficher la valeur sous le code barres
       fontSize: 20,
-      fontFamily: 'Arial, sans-serif',
+      fontFamily: 'DejaVu Sans Mono, Courier, monospace',
       textAlign: 'center',
       textPosition: 'bottom',
       textMargin: 2,
@@ -52,11 +52,9 @@ export async function GET(request) {
     const textPrefix = searchParams.get('textPrefix') || defaults.textPrefix;
     const textSuffix = searchParams.get('textSuffix') || defaults.textSuffix;
 
-    // Assurer une police fiable pour la production
-    const safeFonts = ['Arial', 'Helvetica', 'sans-serif', 'DejaVu Sans', 'Liberation Sans'];
-    if (!safeFonts.some(font => fontFamily.includes(font))) {
-      fontFamily = 'Arial, Helvetica, sans-serif';
-    }
+    // Assurer une police fiable pour la production - utiliser uniquement des polices système de base
+    // Forcer l'utilisation d'une police monospace basique qui existe sur tous les serveurs
+    fontFamily = 'DejaVu Sans Mono, Courier New, Courier, Liberation Mono, Consolas, monospace';
 
     // Créer le texte à afficher (avec prefix/suffix) pour les codes-barres
     const displayText = textPrefix + value + textSuffix;
@@ -187,6 +185,10 @@ export async function GET(request) {
     } else {
       // Génération Code-barres (Code128, Code39, EAN, etc.)
       const canvas = createCanvas(width, height);
+      const ctx = canvas.getContext('2d');
+      
+      // Forcer l'utilisation d'une police système de base pour éviter les problèmes en production
+      ctx.font = '20px "Courier New", Courier, monospace';
       
       try {
         if (format === 'svg') {
@@ -202,7 +204,7 @@ export async function GET(request) {
             displayValue: displayValue,
             text: displayValue ? displayText : '',
             fontSize: fontSize,
-            font: fontFamily,
+            font: 'Courier New, monospace',
             textAlign: textAlign,
             textPosition: textPosition,
             textMargin: textMargin,
@@ -223,7 +225,7 @@ export async function GET(request) {
             displayValue: displayValue,
             text: displayValue ? displayText : '',
             fontSize: fontSize,
-            font: fontFamily,
+            font: 'Courier New, monospace',
             textAlign: textAlign,
             textPosition: textPosition,
             textMargin: textMargin,
@@ -254,7 +256,7 @@ export async function GET(request) {
             displayValue: displayValue,
             text: displayValue ? displayText : '',
             fontSize: fontSize,
-            font: fontFamily,
+            font: 'Courier New, monospace',
             textAlign: textAlign,
             textPosition: textPosition,
             textMargin: textMargin,

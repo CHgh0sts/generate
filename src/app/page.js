@@ -17,7 +17,7 @@ export default function Home() {
     errorCorrectionLevel: 'M',
     displayValue: true,
     fontSize: 20,
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: 'DejaVu Sans Mono, Courier, monospace',
     textAlign: 'center',
     textPosition: 'bottom',
     textMargin: 2,
@@ -52,10 +52,10 @@ export default function Home() {
   ];
 
   const fontFamilies = [
-    { value: 'monospace', label: 'Monospace' },
-    { value: 'Arial', label: 'Arial' },
-    { value: 'serif', label: 'Serif' },
-    { value: 'sans-serif', label: 'Sans-serif' },
+    { value: 'DejaVu Sans Mono, Courier, monospace', label: 'Monospace (Sûr)' },
+    { value: 'DejaVu Sans, Liberation Sans, sans-serif', label: 'Sans-serif (Sûr)' },
+    { value: 'DejaVu Serif, Liberation Serif, serif', label: 'Serif (Sûr)' },
+    { value: 'Courier New, Courier, monospace', label: 'Courier (Sûr)' },
   ];
 
   const textAlignments = [
