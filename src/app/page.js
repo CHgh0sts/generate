@@ -9,7 +9,7 @@ export default function Home() {
     format: 'png',
     width: 500,
     height: 500,
-    margin: 4,
+    margin: 1,
     color: '#000000',
     backgroundColor: '#ffffff',
     transparent: false,
@@ -17,7 +17,7 @@ export default function Home() {
     errorCorrectionLevel: 'M',
     displayValue: true,
     fontSize: 20,
-    fontFamily: 'monospace',
+    fontFamily: 'Arial, sans-serif',
     textAlign: 'center',
     textPosition: 'bottom',
     textMargin: 2

@@ -15,7 +15,7 @@ export async function GET(request) {
       format: 'png', // png, svg, jpeg
       width: 500,
       height: 500,
-      margin: 4,
+      margin: 1,
       color: '#000000',
       backgroundColor: '#ffffff',
       transparent: false, // fond transparent
@@ -23,7 +23,7 @@ export async function GET(request) {
       errorCorrectionLevel: 'M', // L, M, Q, H (pour QR codes)
       displayValue: true, // afficher la valeur sous le code barres
       fontSize: 20,
-      fontFamily: 'monospace',
+      fontFamily: 'Arial, sans-serif',
       textAlign: 'center',
       textPosition: 'bottom',
       textMargin: 2
@@ -43,10 +43,16 @@ export async function GET(request) {
     const errorCorrectionLevel = searchParams.get('errorCorrectionLevel') || defaults.errorCorrectionLevel;
     const displayValue = searchParams.get('displayValue') !== 'false';
     const fontSize = parseInt(searchParams.get('fontSize')) || defaults.fontSize;
-    const fontFamily = searchParams.get('fontFamily') || defaults.fontFamily;
+    let fontFamily = searchParams.get('fontFamily') || defaults.fontFamily;
     const textAlign = searchParams.get('textAlign') || defaults.textAlign;
     const textPosition = searchParams.get('textPosition') || defaults.textPosition;
     const textMargin = parseInt(searchParams.get('textMargin')) || defaults.textMargin;
+
+    // Assurer une police fiable pour la production
+    const safeFonts = ['Arial', 'Helvetica', 'sans-serif', 'DejaVu Sans', 'Liberation Sans'];
+    if (!safeFonts.some(font => fontFamily.includes(font))) {
+      fontFamily = 'Arial, Helvetica, sans-serif';
+    }
 
     let buffer;
     let contentType;
