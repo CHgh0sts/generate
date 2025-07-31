@@ -176,50 +176,77 @@ export async function GET(request) {
       const canvas = createCanvas(width, height);
       
       try {
-        JsBarcode(canvas, value, {
-          format: type.toUpperCase(),
-          width: 2,
-          height: height - (displayValue ? fontSize + textMargin * 2 : 0),
-          displayValue: displayValue,
-          fontSize: fontSize,
-          fontOptions: fontFamily,
-          textAlign: textAlign,
-          textPosition: textPosition,
-          textMargin: textMargin,
-          background: transparent ? 'transparent' : backgroundColor,
-          lineColor: color,
-          margin: margin
-        });
-
         if (format === 'svg') {
-          // Pour SVG, créons une chaîne SVG simple
-          const svgWidth = width;
-          const svgHeight = height;
-          const barWidth = 2;
-          const bars = Math.floor(svgWidth / (barWidth + 1));
+          // Laisser JsBarcode générer directement le SVG
+          const svgCanvas = { 
+            svg: ''
+          };
           
-          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
+          JsBarcode(svgCanvas, value, {
+            format: type.toUpperCase(),
+            width: 2,
+            height: height - (displayValue ? fontSize + textMargin * 2 : 0),
+            displayValue: displayValue,
+            fontSize: fontSize,
+            font: fontFamily,
+            textAlign: textAlign,
+            textPosition: textPosition,
+            textMargin: textMargin,
+            background: transparent ? 'transparent' : backgroundColor,
+            lineColor: color,
+            margin: margin,
+            xmlDocument: svgCanvas,
+            width: width,
+            height: height
+          });
           
-          // Ajouter le fond seulement si pas transparent
+          // JsBarcode pour SVG nécessite une approche différente
+          // Utilisons une approche hybride : générer en PNG puis convertir
+          JsBarcode(canvas, value, {
+            format: type.toUpperCase(),
+            width: 2,
+            height: height - (displayValue ? fontSize + textMargin * 2 : 0),
+            displayValue: displayValue,
+            fontSize: fontSize,
+            font: fontFamily,
+            textAlign: textAlign,
+            textPosition: textPosition,
+            textMargin: textMargin,
+            background: transparent ? 'transparent' : backgroundColor,
+            lineColor: color,
+            margin: margin
+          });
+          
+          // Convertir le canvas en SVG
+          const imageData = canvas.toDataURL();
+          let svgContent = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`;
+          
           if (!transparent) {
-            svgContent += `<rect width="${svgWidth}" height="${svgHeight}" fill="${backgroundColor}"/>`;
+            svgContent += `<rect width="${width}" height="${height}" fill="${backgroundColor}"/>`;
           }
           
-          // Génération simple de barres basée sur la valeur
-          for (let i = 0; i < bars; i++) {
-            if (i % 2 === 0) {
-              svgContent += `<rect x="${i * (barWidth + 1)}" y="${margin}" width="${barWidth}" height="${svgHeight - margin * 2}" fill="${color}"/>`;
-            }
-          }
-          
-          if (displayValue) {
-            svgContent += `<text x="${svgWidth / 2}" y="${svgHeight - textMargin}" text-anchor="middle" font-family="${fontFamily}" font-size="${fontSize}" fill="${color}">${value}</text>`;
-          }
-          
+          svgContent += `<image x="0" y="0" width="${width}" height="${height}" xlink:href="${imageData}"/>`;
           svgContent += '</svg>';
+          
           buffer = svgContent;
           contentType = 'image/svg+xml';
         } else {
+          // Pour PNG, utiliser la bonne syntaxe des paramètres
+          JsBarcode(canvas, value, {
+            format: type.toUpperCase(),
+            width: 2,
+            height: height - (displayValue ? fontSize + textMargin * 2 : 0),
+            displayValue: displayValue,
+            fontSize: fontSize,
+            font: fontFamily,
+            textAlign: textAlign,
+            textPosition: textPosition,
+            textMargin: textMargin,
+            background: transparent ? 'transparent' : backgroundColor,
+            lineColor: color,
+            margin: margin
+          });
+          
           buffer = canvas.toBuffer('image/png');
           contentType = 'image/png';
         }
@@ -231,7 +258,7 @@ export async function GET(request) {
           height: height - (displayValue ? fontSize + textMargin * 2 : 0),
           displayValue: displayValue,
           fontSize: fontSize,
-          fontOptions: fontFamily,
+          font: fontFamily,
           textAlign: textAlign,
           textPosition: textPosition,
           textMargin: textMargin,
@@ -241,31 +268,17 @@ export async function GET(request) {
         });
         
         if (format === 'svg') {
-          // Pour SVG, créons une chaîne SVG simple même en cas d'erreur
-          const svgWidth = width;
-          const svgHeight = height;
-          const barWidth = 2;
-          const bars = Math.floor(svgWidth / (barWidth + 1));
+          // Convertir le canvas en SVG
+          const imageData = canvas.toDataURL();
+          let svgContent = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`;
           
-          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
-          
-          // Ajouter le fond seulement si pas transparent
           if (!transparent) {
-            svgContent += `<rect width="${svgWidth}" height="${svgHeight}" fill="${backgroundColor}"/>`;
+            svgContent += `<rect width="${width}" height="${height}" fill="${backgroundColor}"/>`;
           }
           
-          // Génération simple de barres basée sur la valeur
-          for (let i = 0; i < bars; i++) {
-            if (i % 2 === 0) {
-              svgContent += `<rect x="${i * (barWidth + 1)}" y="${margin}" width="${barWidth}" height="${svgHeight - margin * 2}" fill="${color}"/>`;
-            }
-          }
-          
-          if (displayValue) {
-            svgContent += `<text x="${svgWidth / 2}" y="${svgHeight - textMargin}" text-anchor="middle" font-family="${fontFamily}" font-size="${fontSize}" fill="${color}">${value}</text>`;
-          }
-          
+          svgContent += `<image x="0" y="0" width="${width}" height="${height}" xlink:href="${imageData}"/>`;
           svgContent += '</svg>';
+          
           buffer = svgContent;
           contentType = 'image/svg+xml';
         } else {

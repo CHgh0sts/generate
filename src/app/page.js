@@ -98,10 +98,41 @@ export default function Home() {
   }, [params]);
 
   const handleParamChange = (key, value) => {
-    setParams(prev => ({
-      ...prev,
-      [key]: value
-    }));
+    setParams(prev => {
+      const newParams = {
+        ...prev,
+        [key]: value
+      };
+
+      // Ajuster automatiquement les dimensions selon le type de code
+      if (key === 'type') {
+        const previousType = prev.type;
+        const newType = value;
+        
+        // Types de codes-barres 1D
+        const barcodeTypes = ['code128', 'code39', 'ean13', 'ean8', 'upc'];
+        // Types de codes 2D
+        const twoDTypes = ['qrcode', 'datamatrix'];
+        
+        const isPreviousBarcode = barcodeTypes.includes(previousType);
+        const isPrevious2D = twoDTypes.includes(previousType);
+        const isNewBarcode = barcodeTypes.includes(newType);
+        const isNew2D = twoDTypes.includes(newType);
+        
+        // Si on passe d'un code 2D vers un code-barres, changer à 200x100
+        if (isPrevious2D && isNewBarcode) {
+          newParams.width = 200;
+          newParams.height = 100;
+        }
+        // Si on passe d'un code-barres vers un code 2D, changer à 500x500
+        else if (isPreviousBarcode && isNew2D) {
+          newParams.width = 500;
+          newParams.height = 500;
+        }
+      }
+
+      return newParams;
+    });
   };
 
   const copyApiUrl = () => {
