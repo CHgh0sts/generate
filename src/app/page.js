@@ -2,40 +2,42 @@
 
 import { useState, useEffect } from 'react';
 
-export default function Home() {
-  const [params, setParams] = useState({
-    value: 'Hello World',
-    type: 'qrcode',
-    format: 'png',
-    width: 500,
-    height: 500,
-    margin: 1,
-    color: '#000000',
-    backgroundColor: '#ffffff',
-    transparent: false,
-    dataMatrixSize: 'auto',
-    errorCorrectionLevel: 'M',
-    displayValue: true,
-    fontSize: 20,
+const defaultParams = {
+  value: 'Hello World',
+  type: 'qrcode',
+  format: 'png',
+  width: 500,
+  height: 500,
+  margin: 1,
+  color: '#000000',
+  backgroundColor: '#ffffff',
+  transparent: false,
+  dataMatrixSize: 'auto',
+  errorCorrectionLevel: 'M',
+  displayValue: true,
+  fontSize: 20,
+  textAlign: 'center',
+  textPosition: 'bottom',
+  textMargin: 2,
+  textPrefix: '',
+  textSuffix: '',
+  // Paramètres WiFi
+  wifiMode: false,
+  wifiSSID: '',
+  wifiPassword: '',
+  wifiSecurity: 'WPA',
+  wifiHidden: false,
+  // Paramètres dégradé
+  gradientMode: false,
+  gradientColors: ['#000000', '#0066cc'],
+  gradientDirection: 'horizontal'
+};
 
-    textAlign: 'center',
-    textPosition: 'bottom',
-    textMargin: 2,
-    textPrefix: '',
-    textSuffix: '',
-    // Paramètres WiFi
-    wifiMode: false,
-    wifiSSID: '',
-    wifiPassword: '',
-    wifiSecurity: 'WPA',
-    wifiHidden: false,
-    // Paramètres dégradé
-    gradientMode: false,
-    gradientColors: ['#000000', '#0066cc'],
-    gradientDirection: 'horizontal'
-  });
+export default function Home() {
+  const [params, setParams] = useState({ ...defaultParams });
 
   const [imageUrl, setImageUrl] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
   const [apiUrl, setApiUrl] = useState('');
   const [fullApiUrl, setFullApiUrl] = useState('');
   const [showWifiPassword, setShowWifiPassword] = useState(false);
@@ -106,27 +108,43 @@ export default function Home() {
     const urlParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (key === 'gradientColors' && Array.isArray(value)) {
-          // Convertir le tableau de couleurs en string séparée par virgules
-          urlParams.append(key, value.join(','));
-        } else {
-          urlParams.append(key, value.toString());
+        // Convertir la valeur courante en string
+        const strValue = (key === 'gradientColors' && Array.isArray(value))
+          ? value.join(',')
+          : value.toString();
+
+        // Convertir la valeur par défaut en string
+        const defaultVal = defaultParams[key];
+        const strDefault = (key === 'gradientColors' && Array.isArray(defaultVal))
+          ? defaultVal.join(',')
+          : (defaultVal !== undefined && defaultVal !== null ? defaultVal.toString() : undefined);
+
+        // Paramètres obligatoires (toujours présents dans l'URL)
+        const requiredParams = ['value', 'type'];
+
+        // Ajouter si obligatoire ou si différent de la valeur par défaut
+        if (requiredParams.includes(key) || strValue !== strDefault) {
+          urlParams.append(key, strValue);
         }
       }
     });
 
-    // Forcer le format SVG si le mode dégradé est activé
-    if (params.gradientMode && params.format !== 'svg') {
-      urlParams.set('format', 'svg');
+    // URL pour le téléchargement (format choisi par l'utilisateur)
+    const downloadApiUrl = `/api/generate?${urlParams.toString()}`;
+    setApiUrl(downloadApiUrl);
+    setImageUrl(downloadApiUrl);
+    
+    // URL pour l'aperçu (SVG si dégradé, sinon format choisi)
+    const previewParams = new URLSearchParams(urlParams);
+    if (params.gradientMode) {
+      previewParams.set('format', 'svg');
     }
-
-    const newApiUrl = `/api/generate?${urlParams.toString()}`;
-    setApiUrl(newApiUrl);
-    setImageUrl(newApiUrl);
+    const newPreviewUrl = `/api/generate?${previewParams.toString()}`;
+    setPreviewUrl(newPreviewUrl);
     
     // Définir l'URL complète seulement côté client
     if (typeof window !== 'undefined') {
-      setFullApiUrl(`${window.location.origin}${newApiUrl}`);
+      setFullApiUrl(`${window.location.origin}${downloadApiUrl}`);
     }
   }, [params]);
 
@@ -136,15 +154,6 @@ export default function Home() {
         ...prev,
         [key]: value
       };
-
-      // Forcer le format SVG quand le mode dégradé est activé
-      if (key === 'gradientMode' && value === true) {
-        newParams.format = 'svg';
-      }
-      // Remettre PNG par défaut si on désactive le dégradé
-      else if (key === 'gradientMode' && value === false) {
-        newParams.format = 'png';
-      }
 
       // Ajuster automatiquement les dimensions selon le type de code
       if (key === 'type') {
@@ -203,11 +212,15 @@ export default function Home() {
     alert('URL de l&apos;API copiée dans le presse-papier !');
   };
 
+
+
   const downloadImage = () => {
     const link = document.createElement('a');
     link.href = imageUrl;
     link.download = `${params.type}-${params.value.slice(0, 10)}.${params.format}`;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -258,18 +271,15 @@ export default function Home() {
               {/* Format */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Format
+                  Format de téléchargement
                   {params.gradientMode && (
-                    <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(Forcé: SVG)</span>
+                    <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(Aperçu: SVG)</span>
                   )}
                 </label>
                 <select
-                  value={params.gradientMode ? 'svg' : params.format}
+                  value={params.format}
                   onChange={(e) => handleParamChange('format', e.target.value)}
-                  disabled={params.gradientMode}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                    params.gradientMode ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   {formats.map(format => (
                     <option key={format.value} value={format.value}>{format.label}</option>
@@ -277,7 +287,7 @@ export default function Home() {
                 </select>
                 {params.gradientMode && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Le mode dégradé nécessite le format SVG
+                    L'aperçu utilise SVG pour les dégradés, le téléchargement respecte votre format
                   </p>
                 )}
               </div>
@@ -701,15 +711,15 @@ export default function Home() {
               {params.gradientMode && (
                 <div className="mb-4 text-center">
                   <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
-                    Mode Dégradé (SVG)
+                    Mode Dégradé - Aperçu: SVG | Téléchargement: {params.format.toUpperCase()}
                   </span>
                 </div>
               )}
               <div className="flex items-center justify-center">
-                {imageUrl ? (
+                {previewUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={imageUrl}
+                    src={previewUrl}
                     alt="Code généré"
                     className="max-w-full max-h-[300px] object-contain"
                     style={{ 
@@ -718,11 +728,11 @@ export default function Home() {
                       borderRadius: '4px'
                     }}
                     onError={(e) => {
-                      console.error('Erreur de chargement de l\'image:', e);
+                      console.error('Erreur de chargement de l\'aperçu:', e);
                       e.target.style.display = 'none';
                     }}
                     onLoad={() => {
-                      console.log('Image chargée avec succès:', imageUrl);
+                      console.log('Aperçu chargé avec succès:', previewUrl);
                     }}
                   />
                 ) : (
