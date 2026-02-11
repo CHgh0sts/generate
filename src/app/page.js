@@ -287,7 +287,7 @@ export default function Home() {
                 </select>
                 {params.gradientMode && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    L'aperçu utilise SVG pour les dégradés, le téléchargement respecte votre format
+                    L&apos;aperçu utilise SVG pour les dégradés, le téléchargement respecte votre format
                   </p>
                 )}
               </div>
