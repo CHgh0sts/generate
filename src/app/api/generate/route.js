@@ -4,6 +4,8 @@ import JsBarcode from 'jsbarcode';
 import { createCanvas, registerFont } from 'canvas';
 import bwipjs from 'bwip-js';
 import path from 'path';
+import sharp from 'sharp';
+import puppeteer from 'puppeteer';
 
 // Enregistrer la police personnalisée
 const fontPath = path.join(process.cwd(), 'src/app/api/generate/font.ttf');
@@ -147,6 +149,91 @@ function generateGradient(gradientColors, gradientDirection, width, height) {
   };
 }
 
+// Instance Puppeteer partagée pour éviter la re-création
+let browser = null;
+
+async function getBrowser() {
+  if (!browser) {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor'
+      ]
+    });
+  }
+  return browser;
+}
+
+// Fonction pour convertir SVG en PNG avec Puppeteer (supporte parfaitement les dégradés)
+async function convertSvgToPng(svgString, width, height, backgroundColor, transparent) {
+  let page = null;
+  try {
+    console.log('🔄 Conversion SVG vers PNG avec Puppeteer...');
+    console.log('📏 Dimensions:', width, 'x', height);
+    console.log('🎨 Arrière-plan:', backgroundColor, 'Transparent:', transparent);
+    
+    const browser = await getBrowser();
+    page = await browser.newPage();
+    
+    // Définir la taille de la page
+    await page.setViewport({ width, height, deviceScaleFactor: 2 });
+    
+    // Créer une page HTML avec le SVG
+    const bgColor = transparent ? 'transparent' : (backgroundColor || '#ffffff');
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { 
+          margin: 0; 
+          padding: 0; 
+          background: ${bgColor};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: ${width}px;
+          height: ${height}px;
+        }
+        svg {
+          max-width: 100%;
+          max-height: 100%;
+        }
+      </style>
+    </head>
+    <body>
+      ${svgString}
+    </body>
+    </html>`;
+    
+    await page.setContent(html);
+    
+    // Attendre que le SVG soit rendu
+    await page.waitForSelector('svg');
+    
+    // Capturer comme PNG
+    const screenshot = await page.screenshot({
+      type: 'png',
+      omitBackground: transparent,
+      fullPage: true
+    });
+    
+    console.log('✅ Conversion réussie avec Puppeteer, taille PNG:', screenshot.length, 'bytes');
+    return screenshot;
+    
+  } catch (error) {
+    console.error('❌ Erreur conversion SVG vers PNG avec Puppeteer:', error);
+    throw error;
+  } finally {
+    if (page) {
+      await page.close();
+    }
+  }
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -180,7 +267,9 @@ export async function GET(request) {
       // Paramètres dégradé
       gradientMode: false, // activer le mode dégradé
       gradientColors: '#000000,#0066cc', // couleurs du dégradé séparées par virgule
-      gradientDirection: 'horizontal' // direction du dégradé
+      gradientDirection: 'horizontal', // direction du dégradé
+      // Conversion
+      convertFromSvg: false // convertir un SVG avec dégradé en PNG
     };
 
     // Récupération des paramètres
@@ -526,6 +615,24 @@ export async function GET(request) {
           buffer = canvas.toBuffer('image/png');
           contentType = 'image/png';
         }
+      }
+    }
+
+    // Conversion SVG vers PNG si nécessaire (dégradé + format PNG demandé)
+    if (gradientMode && format === 'png' && contentType === 'image/svg+xml') {
+      console.log('🎯 Conversion demandée: gradientMode =', gradientMode, 'format =', format, 'contentType =', contentType);
+      try {
+        const originalSize = buffer.length;
+        console.log('📊 Taille SVG original:', originalSize, 'bytes');
+        
+        buffer = await convertSvgToPng(buffer.toString(), width, height, backgroundColor, transparent);
+        contentType = 'image/png';
+        
+        console.log('✅ Conversion terminée, nouvelle taille PNG:', buffer.length, 'bytes');
+      } catch (conversionError) {
+        console.error('❌ Erreur de conversion SVG vers PNG:', conversionError);
+        console.log('⚠️ Retour au SVG original en cas d\'échec');
+        // En cas d'échec, garder le SVG original
       }
     }
 
