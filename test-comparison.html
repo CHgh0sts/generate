@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dégradés - SVG vs PNG</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; }
+        .test-item { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        h1 { text-align: center; color: #333; }
+        h2 { color: #666; margin-bottom: 10px; }
+        img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+        .info { font-size: 14px; color: #888; margin-top: 10px; }
+        .success { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Test des Dégradés - Conversion SVG → PNG</h1>
+        
+        <div class="comparison">
+            <div class="test-item">
+                <h2>📄 Aperçu (SVG)</h2>
+                <img src="./test-puppeteer.svg" alt="QR Code SVG avec dégradé">
+                <div class="info">
+                    Format: SVG<br>
+                    Dégradé: Natif<br>
+                    Taille: ~1.2 KB
+                </div>
+            </div>
+            
+            <div class="test-item">
+                <h2>🖼️ Téléchargement (PNG)</h2>
+                <img src="./test-puppeteer.png" alt="QR Code PNG avec dégradé">
+                <div class="info">
+                    Format: PNG<br>
+                    Dégradé: Converti via Puppeteer<br>
+                    Taille: ~2.4 KB
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <p class="success">✅ Les dégradés sont maintenant préservés dans le PNG !</p>
+            <p>Dégradé testé: Rouge → Vert → Bleu (vertical)</p>
+        </div>
+    </div>
+</body>
+</html>

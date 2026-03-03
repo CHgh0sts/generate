@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 
 const defaultParams = {
   value: 'Hello World',
@@ -21,790 +22,375 @@ const defaultParams = {
   textMargin: 2,
   textPrefix: '',
   textSuffix: '',
-  // Paramètres WiFi
   wifiMode: false,
   wifiSSID: '',
   wifiPassword: '',
   wifiSecurity: 'WPA',
   wifiHidden: false,
-  // Paramètres dégradé
   gradientMode: false,
   gradientColors: ['#000000', '#0066cc'],
   gradientDirection: 'horizontal'
 };
 
+const codeTypes = [
+  { value: 'qrcode', label: 'QR Code' },
+  { value: 'code128', label: 'Code 128' },
+  { value: 'code39', label: 'Code 39' },
+  { value: 'ean13', label: 'EAN-13' },
+  { value: 'ean8', label: 'EAN-8' },
+  { value: 'upc', label: 'UPC' },
+  { value: 'datamatrix', label: 'Data Matrix' },
+];
+
+const formats = [{ value: 'png', label: 'PNG' }, { value: 'svg', label: 'SVG' }];
+const errorLevels = [{ value: 'L', label: 'L' }, { value: 'M', label: 'M' }, { value: 'Q', label: 'Q' }, { value: 'H', label: 'H' }];
+const textAlignments = [{ value: 'left', label: 'Gauche' }, { value: 'center', label: 'Centre' }, { value: 'right', label: 'Droite' }];
+const textPositions = [{ value: 'bottom', label: 'Bas' }, { value: 'top', label: 'Haut' }];
+const wifiSecurityTypes = [{ value: 'WPA', label: 'WPA' }, { value: 'WEP', label: 'WEP' }, { value: 'nopass', label: 'Aucune' }];
+const gradientDirections = [{ value: 'horizontal', label: 'Horizontal' }, { value: 'vertical', label: 'Vertical' }, { value: 'diagonal-lr', label: 'Diagonal ↘' }, { value: 'diagonal-rl', label: 'Diagonal ↙' }, { value: 'radial', label: 'Radial' }, { value: 'conic', label: 'Conique' }];
+const dataMatrixSizes = [{ value: 'auto', label: 'Auto' }, { value: '10', label: '10×10' }, { value: '12', label: '12×12' }, { value: '14', label: '14×14' }, { value: '16', label: '16×16' }, { value: '18', label: '18×18' }, { value: '20', label: '20×20' }, { value: '22', label: '22×22' }, { value: '24', label: '24×24' }];
+
 export default function Home() {
   const [params, setParams] = useState({ ...defaultParams });
-
-  const [imageUrl, setImageUrl] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
-  const [apiUrl, setApiUrl] = useState('');
   const [fullApiUrl, setFullApiUrl] = useState('');
   const [showWifiPassword, setShowWifiPassword] = useState(false);
-
-  const codeTypes = [
-    { value: 'qrcode', label: 'QR Code' },
-    { value: 'code128', label: 'Code 128' },
-    { value: 'code39', label: 'Code 39' },
-    { value: 'ean13', label: 'EAN-13' },
-    { value: 'ean8', label: 'EAN-8' },
-    { value: 'upc', label: 'UPC' },
-    { value: 'datamatrix', label: 'Data Matrix' },
-  ];
-
-  const formats = [
-    { value: 'png', label: 'PNG' },
-    { value: 'svg', label: 'SVG' },
-  ];
-
-  const errorLevels = [
-    { value: 'L', label: 'Low (L)' },
-    { value: 'M', label: 'Medium (M)' },
-    { value: 'Q', label: 'Quartile (Q)' },
-    { value: 'H', label: 'High (H)' },
-  ];
-
-
-
-  const textAlignments = [
-    { value: 'left', label: 'Gauche' },
-    { value: 'center', label: 'Centre' },
-    { value: 'right', label: 'Droite' },
-  ];
-
-  const textPositions = [
-    { value: 'bottom', label: 'Bas' },
-    { value: 'top', label: 'Haut' },
-  ];
-
-  const wifiSecurityTypes = [
-    { value: 'WPA', label: 'WPA/WPA2' },
-    { value: 'WEP', label: 'WEP' },
-    { value: 'nopass', label: 'Aucune sécurité' },
-  ];
-
-  const gradientDirections = [
-    { value: 'horizontal', label: 'Horizontal (→)' },
-    { value: 'vertical', label: 'Vertical (↓)' },
-    { value: 'diagonal-lr', label: 'Diagonal ↘' },
-    { value: 'diagonal-rl', label: 'Diagonal ↙' },
-    { value: 'radial', label: 'Radial (○)' },
-    { value: 'conic', label: 'Conique (◐)' },
-  ];
-
-  const dataMatrixSizes = [
-    { value: 'auto', label: 'Auto (basé sur le texte)' },
-    { value: '10', label: '10x10' },
-    { value: '12', label: '12x12' },
-    { value: '14', label: '14x14' },
-    { value: '16', label: '16x16' },
-    { value: '18', label: '18x18' },
-    { value: '20', label: '20x20' },
-    { value: '22', label: '22x22' },
-    { value: '24', label: '24x24' },
-  ];
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        // Convertir la valeur courante en string
-        const strValue = (key === 'gradientColors' && Array.isArray(value))
-          ? value.join(',')
-          : value.toString();
-
-        // Convertir la valeur par défaut en string
+        const strValue = (key === 'gradientColors' && Array.isArray(value)) ? value.join(',') : value.toString();
         const defaultVal = defaultParams[key];
-        const strDefault = (key === 'gradientColors' && Array.isArray(defaultVal))
-          ? defaultVal.join(',')
-          : (defaultVal !== undefined && defaultVal !== null ? defaultVal.toString() : undefined);
-
-        // Paramètres obligatoires (toujours présents dans l'URL)
-        const requiredParams = ['value', 'type'];
-
-        // Ajouter si obligatoire ou si différent de la valeur par défaut
-        if (requiredParams.includes(key) || strValue !== strDefault) {
+        const strDefault = (key === 'gradientColors' && Array.isArray(defaultVal)) ? defaultVal.join(',') : (defaultVal !== undefined && defaultVal !== null ? defaultVal.toString() : undefined);
+        if (['value', 'type'].includes(key) || strValue !== strDefault) {
           urlParams.append(key, strValue);
         }
       }
     });
-
-    // URL pour le téléchargement (format choisi par l'utilisateur)
     const downloadApiUrl = `/api/generate?${urlParams.toString()}`;
-    setApiUrl(downloadApiUrl);
-    setImageUrl(downloadApiUrl);
-    
-    // URL pour l'aperçu (SVG si dégradé, sinon format choisi)
     const previewParams = new URLSearchParams(urlParams);
-    if (params.gradientMode) {
-      previewParams.set('format', 'svg');
-    }
-    const newPreviewUrl = `/api/generate?${previewParams.toString()}`;
-    setPreviewUrl(newPreviewUrl);
-    
-    // Définir l'URL complète seulement côté client
-    if (typeof window !== 'undefined') {
-      setFullApiUrl(`${window.location.origin}${downloadApiUrl}`);
-    }
+    if (params.gradientMode) previewParams.set('format', 'svg');
+    setPreviewUrl(`/api/generate?${previewParams.toString()}`);
+    if (typeof window !== 'undefined') setFullApiUrl(`${window.location.origin}${downloadApiUrl}`);
   }, [params]);
 
   const handleParamChange = (key, value) => {
     setParams(prev => {
-      const newParams = {
-        ...prev,
-        [key]: value
-      };
-
-      // Ajuster automatiquement les dimensions selon le type de code
+      const newParams = { ...prev, [key]: value };
       if (key === 'type') {
-        const previousType = prev.type;
-        const newType = value;
-        
-        // Types de codes-barres 1D
         const barcodeTypes = ['code128', 'code39', 'ean13', 'ean8', 'upc'];
-        // Types de codes 2D
         const twoDTypes = ['qrcode', 'datamatrix'];
-        
-        const isPreviousBarcode = barcodeTypes.includes(previousType);
-        const isPrevious2D = twoDTypes.includes(previousType);
-        const isNewBarcode = barcodeTypes.includes(newType);
-        const isNew2D = twoDTypes.includes(newType);
-        
-        // Si on passe d'un code 2D vers un code-barres, changer à 200x100
-        if (isPrevious2D && isNewBarcode) {
-          newParams.width = 200;
-          newParams.height = 100;
-        }
-        // Si on passe d'un code-barres vers un code 2D, changer à 500x500
-        else if (isPreviousBarcode && isNew2D) {
-          newParams.width = 500;
-          newParams.height = 500;
-        }
+        if (twoDTypes.includes(prev.type) && barcodeTypes.includes(value)) { newParams.width = 200; newParams.height = 100; }
+        else if (barcodeTypes.includes(prev.type) && twoDTypes.includes(value)) { newParams.width = 500; newParams.height = 500; }
       }
-
       return newParams;
     });
   };
 
-  const addGradientColor = () => {
-    setParams(prev => ({
-      ...prev,
-      gradientColors: [...prev.gradientColors, '#ff0000']
-    }));
-  };
-
-  const removeGradientColor = (index) => {
-    setParams(prev => ({
-      ...prev,
-      gradientColors: prev.gradientColors.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateGradientColor = (index, color) => {
-    setParams(prev => ({
-      ...prev,
-      gradientColors: prev.gradientColors.map((c, i) => i === index ? color : c)
-    }));
-  };
-
-  const copyApiUrl = () => {
-    navigator.clipboard.writeText(fullApiUrl);
-    alert('URL de l&apos;API copiée dans le presse-papier !');
-  };
-
-
+  const addGradientColor = () => setParams(prev => ({ ...prev, gradientColors: [...prev.gradientColors, '#ff0000'] }));
+  const removeGradientColor = (i) => setParams(prev => ({ ...prev, gradientColors: prev.gradientColors.filter((_, idx) => idx !== i) }));
+  const updateGradientColor = (i, c) => setParams(prev => ({ ...prev, gradientColors: prev.gradientColors.map((col, idx) => idx === i ? c : col) }));
 
   const downloadImage = () => {
+    const url = fullApiUrl || (typeof window !== 'undefined' ? `${window.location.origin}/api/generate?value=${encodeURIComponent(params.value)}&type=${params.type}` : '#');
     const link = document.createElement('a');
-    link.href = imageUrl;
+    link.href = url;
     link.download = `${params.type}-${params.value.slice(0, 10)}.${params.format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  const copyApiUrl = () => {
+    navigator.clipboard.writeText(fullApiUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white">
-          Générateur de Codes
-        </h1>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
-          Générez des QR codes, codes barres et data matrix avec de nombreux paramètres personnalisables
-        </p>
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a]">
+      <header className="border-b border-[#e5e5e5] dark:border-[#262626] bg-white dark:bg-[#171717]">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-base font-semibold tracking-tight text-[#171717] dark:text-[#ededed] truncate">Générateur de codes</h1>
+            <p className="text-xs text-[#737373] dark:text-[#a3a3a3] truncate">QR Code, codes-barres, Data Matrix</p>
+          </div>
+          <ThemeToggle />
+        </div>
+      </header>
 
+      <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Panneau de configuration */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Configuration</h2>
-            
-            <div className="space-y-4">
-              {/* Valeur */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Valeur/Texte
-                </label>
-                <input
-                  type="text"
-                  value={params.value}
-                  onChange={(e) => handleParamChange('value', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
+          {/* Formulaire principal */}
+          <div className="space-y-6">
+            <div>
+              <label className="block text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-2">Texte à encoder</label>
+              <input
+                type="text"
+                value={params.value}
+                onChange={(e) => handleParamChange('value', e.target.value)}
+                placeholder="Ex: Hello World"
+                className="w-full px-4 py-3 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] placeholder:text-[#a3a3a3] dark:placeholder:text-[#525252] focus:outline-none focus:ring-2 focus:ring-[#404040] dark:focus:ring-[#525252] focus:border-transparent transition-shadow"
+              />
+            </div>
 
-              {/* Type de code */}
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Type de code
-                </label>
+                <label className="block text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-2">Type</label>
                 <select
                   value={params.type}
                   onChange={(e) => handleParamChange('type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-4 py-3 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2 focus:ring-[#404040] dark:focus:ring-[#525252] focus:border-transparent"
                 >
-                  {codeTypes.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
+                  {codeTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
-        </div>
-
-              {/* Format */}
+              </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Format de téléchargement
-                  {params.gradientMode && (
-                    <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(Aperçu: SVG)</span>
-                  )}
-                </label>
+                <label className="block text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-2">Format</label>
                 <select
                   value={params.format}
                   onChange={(e) => handleParamChange('format', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full px-4 py-3 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2 focus:ring-[#404040] dark:focus:ring-[#525252] focus:border-transparent"
                 >
-                  {formats.map(format => (
-                    <option key={format.value} value={format.value}>{format.label}</option>
-                  ))}
+                  {formats.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
                 </select>
-                {params.gradientMode && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    L&apos;aperçu utilise SVG pour les dégradés, le téléchargement respecte votre format
-                  </p>
-                )}
               </div>
+            </div>
 
-              {/* Dimensions */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Largeur
-                  </label>
-                  <input
-                    type="number"
-                    value={params.width}
-                    onChange={(e) => handleParamChange('width', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Hauteur
-                  </label>
-                  <input
-                    type="number"
-                    value={params.height}
-                    onChange={(e) => handleParamChange('height', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-              </div>
+            {/* Options avancées */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-sm text-[#737373] dark:text-[#a3a3a3] hover:text-[#404040] dark:hover:text-[#ededed] transition-colors"
+              >
+                <span className={`transition-transform ${showAdvanced ? 'rotate-90' : ''}`}>▶</span>
+                Options avancées
+              </button>
 
-              {/* Mode Dégradé */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="gradientMode"
-                  checked={params.gradientMode}
-                  onChange={(e) => handleParamChange('gradientMode', e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="gradientMode" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Mode Dégradé
-                </label>
-              </div>
-
-              {/* Couleurs */}
-              {!params.gradientMode ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Couleur
-                    </label>
-                    <input
-                      type="color"
-                      value={params.color}
-                      onChange={(e) => handleParamChange('color', e.target.value)}
-                      className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Arrière-plan
-                    </label>
-                    <input
-                      type="color"
-                      value={params.backgroundColor}
-                      onChange={(e) => handleParamChange('backgroundColor', e.target.value)}
-                      className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={params.transparent}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Direction du dégradé
-                    </label>
-                    <select
-                      value={params.gradientDirection}
-                      onChange={(e) => handleParamChange('gradientDirection', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    >
-                      {gradientDirections.map(direction => (
-                        <option key={direction.value} value={direction.value}>{direction.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Couleurs du dégradé ({params.gradientColors.length})
-                      </label>
-                      <button
-                        type="button"
-                        onClick={addGradientColor}
-                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                      >
-                        + Ajouter
-                      </button>
+              {showAdvanced && (
+                <div className="mt-4 pt-4 border-t border-[#e5e5e5] dark:border-[#262626] space-y-4">
+                  {/* Dimensions */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Largeur</label>
+                      <input type="number" value={params.width} onChange={(e) => handleParamChange('width', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm focus:outline-none focus:ring-2 focus:ring-[#404040] dark:focus:ring-[#525252]" />
                     </div>
-                    
-                    <div className="space-y-2">
-                      {params.gradientColors.map((color, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500 w-6">{index + 1}.</span>
-                          <input
-                            type="color"
-                            value={color}
-                            onChange={(e) => updateGradientColor(index, e.target.value)}
-                            className="flex-1 h-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          {params.gradientColors.length > 2 && (
-                            <button
-                              type="button"
-                              onClick={() => removeGradientColor(index)}
-                              className="px-2 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                      ))}
+                    <div>
+                      <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Hauteur</label>
+                      <input type="number" value={params.height} onChange={(e) => handleParamChange('height', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm focus:outline-none focus:ring-2 focus:ring-[#404040] dark:focus:ring-[#525252]" />
                     </div>
                   </div>
-                  
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Arrière-plan
-                    </label>
-                    <input
-                      type="color"
-                      value={params.backgroundColor}
-                      onChange={(e) => handleParamChange('backgroundColor', e.target.value)}
-                      className="w-full h-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={params.transparent}
-                    />
-                  </div>
-                </div>
-              )}
 
-              {/* Fond transparent */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="transparent"
-                  checked={params.transparent}
-                  onChange={(e) => handleParamChange('transparent', e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="transparent" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Fond transparent
-                </label>
-              </div>
-
-              {/* Marge (seulement si pas Data Matrix) */}
-              {params.type !== 'datamatrix' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Marge: {params.margin}px
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="20"
-                    value={params.margin}
-                    onChange={(e) => handleParamChange('margin', parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-              )}
-
-              {/* Taille Data Matrix (seulement pour Data Matrix) */}
-              {params.type === 'datamatrix' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Taille de la matrice
-                  </label>
-                  <select
-                    value={params.dataMatrixSize}
-                    onChange={(e) => handleParamChange('dataMatrixSize', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  >
-                    {dataMatrixSizes.map(size => (
-                      <option key={size.value} value={size.value}>{size.label}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Paramètres spécifiques aux QR codes */}
-              {params.type === 'qrcode' && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Niveau de correction d&apos;erreur
-                    </label>
-                    <select
-                      value={params.errorCorrectionLevel}
-                      onChange={(e) => handleParamChange('errorCorrectionLevel', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    >
-                      {errorLevels.map(level => (
-                        <option key={level.value} value={level.value}>{level.label}</option>
-                      ))}
-                    </select>
+                  {/* Dégradé */}
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="gradientMode" checked={params.gradientMode} onChange={(e) => handleParamChange('gradientMode', e.target.checked)} className="rounded border-[#e5e5e5] dark:border-[#404040] text-[#404040] dark:text-[#525252] focus:ring-[#404040] dark:focus:ring-[#525252]" />
+                    <label htmlFor="gradientMode" className="text-sm text-[#525252] dark:text-[#a3a3a3]">Mode dégradé</label>
                   </div>
 
-                  {/* Mode WiFi */}
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="wifiMode"
-                      checked={params.wifiMode}
-                      onChange={(e) => handleParamChange('wifiMode', e.target.checked)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="wifiMode" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Mode WiFi (Connexion automatique)
-                    </label>
-                  </div>
-
-                  {/* Champs WiFi */}
-                  {params.wifiMode && (
-                    <>
+                  {/* Couleurs */}
+                  {!params.gradientMode ? (
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Nom du réseau (SSID) *
-                        </label>
-                        <input
-                          type="text"
-                          value={params.wifiSSID}
-                          onChange={(e) => handleParamChange('wifiSSID', e.target.value)}
-                          placeholder="MonReseauWiFi"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
+                        <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Couleur</label>
+                        <input type="color" value={params.color} onChange={(e) => handleParamChange('color', e.target.value)} className="w-full h-9 border border-[#e5e5e5] dark:border-[#404040] rounded-md cursor-pointer" />
                       </div>
-
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Type de sécurité
-                        </label>
-                        <select
-                          value={params.wifiSecurity}
-                          onChange={(e) => handleParamChange('wifiSecurity', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                          {wifiSecurityTypes.map(security => (
-                            <option key={security.value} value={security.value}>{security.label}</option>
-                          ))}
+                        <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Fond</label>
+                        <input type="color" value={params.backgroundColor} onChange={(e) => handleParamChange('backgroundColor', e.target.value)} disabled={params.transparent} className="w-full h-9 border border-[#e5e5e5] dark:border-[#404040] rounded-md cursor-pointer disabled:opacity-50" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Direction</label>
+                        <select value={params.gradientDirection} onChange={(e) => handleParamChange('gradientDirection', e.target.value)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm">
+                          {gradientDirections.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
                         </select>
                       </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs text-[#737373] dark:text-[#a3a3a3]">Couleurs</label>
+                          <button type="button" onClick={addGradientColor} className="text-xs text-[#404040] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] font-medium">+ Ajouter</button>
+                        </div>
+                        <div className="space-y-2">
+                          {params.gradientColors.map((c, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <input type="color" value={c} onChange={(e) => updateGradientColor(i, e.target.value)} className="h-8 w-12 border border-[#e5e5e5] dark:border-[#404040] rounded cursor-pointer" />
+                              {params.gradientColors.length > 2 && <button type="button" onClick={() => removeGradientColor(i)} className="text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] text-sm">×</button>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                      {params.wifiSecurity !== 'nopass' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Mot de passe WiFi
-                          </label>
-                          <div className="relative">
-                            <input
-                              type={showWifiPassword ? "text" : "password"}
-                              value={params.wifiPassword}
-                              onChange={(e) => handleParamChange('wifiPassword', e.target.value)}
-                              placeholder="Mot de passe du réseau"
-                              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowWifiPassword(!showWifiPassword)}
-                              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                            >
-                              {showWifiPassword ? (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                                </svg>
-                              ) : (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              )}
-                            </button>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="transparent" checked={params.transparent} onChange={(e) => handleParamChange('transparent', e.target.checked)} className="rounded border-[#e5e5e5] dark:border-[#404040] text-[#404040] dark:text-[#525252]" />
+                    <label htmlFor="transparent" className="text-sm text-[#525252] dark:text-[#a3a3a3]">Fond transparent</label>
+                  </div>
+
+                  {params.type !== 'datamatrix' && (
+                    <div>
+                      <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Marge: {params.margin}px</label>
+                      <input type="range" min="0" max="20" value={params.margin} onChange={(e) => handleParamChange('margin', parseInt(e.target.value))} className="w-full" />
+                    </div>
+                  )}
+
+                  {params.type === 'datamatrix' && (
+                    <div>
+                      <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Taille matrice</label>
+                      <select value={params.dataMatrixSize} onChange={(e) => handleParamChange('dataMatrixSize', e.target.value)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm">
+                        {dataMatrixSizes.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* QR Code */}
+                  {params.type === 'qrcode' && (
+                    <>
+                      <div>
+                        <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Correction erreur</label>
+                        <select value={params.errorCorrectionLevel} onChange={(e) => handleParamChange('errorCorrectionLevel', e.target.value)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm">
+                          {errorLevels.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="wifiMode" checked={params.wifiMode} onChange={(e) => handleParamChange('wifiMode', e.target.checked)} className="rounded border-[#e5e5e5] dark:border-[#404040] text-[#404040] dark:text-[#525252]" />
+                        <label htmlFor="wifiMode" className="text-sm text-[#525252] dark:text-[#a3a3a3]">Mode WiFi</label>
+                      </div>
+                      {params.wifiMode && (
+                        <div className="space-y-3 pl-4 border-l-2 border-[#e5e5e5] dark:border-[#262626]">
+                          <div>
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">SSID</label>
+                            <input type="text" value={params.wifiSSID} onChange={(e) => handleParamChange('wifiSSID', e.target.value)} placeholder="Nom du réseau" className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm" />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Sécurité</label>
+                            <select value={params.wifiSecurity} onChange={(e) => handleParamChange('wifiSecurity', e.target.value)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm">
+                              {wifiSecurityTypes.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                          </div>
+                          {params.wifiSecurity !== 'nopass' && (
+                            <div className="relative">
+                              <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Mot de passe</label>
+                              <input type={showWifiPassword ? 'text' : 'password'} value={params.wifiPassword} onChange={(e) => handleParamChange('wifiPassword', e.target.value)} placeholder="Mot de passe" className="w-full px-3 py-2 pr-10 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm" />
+                              <button type="button" onClick={() => setShowWifiPassword(!showWifiPassword)} className="absolute right-2 top-8 text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed]">
+                                {showWifiPassword ? <EyeOffIcon /> : <EyeIcon />}
+                              </button>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" id="wifiHidden" checked={params.wifiHidden} onChange={(e) => handleParamChange('wifiHidden', e.target.checked)} className="rounded border-[#e5e5e5] dark:border-[#404040] text-[#404040] dark:text-[#525252]" />
+                            <label htmlFor="wifiHidden" className="text-sm text-[#525252] dark:text-[#a3a3a3]">Réseau caché</label>
                           </div>
                         </div>
                       )}
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="wifiHidden"
-                          checked={params.wifiHidden}
-                          onChange={(e) => handleParamChange('wifiHidden', e.target.checked)}
-                          className="mr-2"
-                        />
-                        <label htmlFor="wifiHidden" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Réseau caché
-                        </label>
-                      </div>
                     </>
                   )}
-                </>
-              )}
 
-              {/* Paramètres spécifiques aux codes barres */}
-              {params.type !== 'qrcode' && params.type !== 'datamatrix' && (
-                <>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="displayValue"
-                      checked={params.displayValue}
-                      onChange={(e) => handleParamChange('displayValue', e.target.checked)}
-                      className="mr-2"
-                    />
-                    <label htmlFor="displayValue" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Afficher la valeur
-                    </label>
-                  </div>
-
-                  {params.displayValue && (
+                  {/* Codes-barres */}
+                  {params.type !== 'qrcode' && params.type !== 'datamatrix' && (
                     <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Préfixe du texte
-                        </label>
-                        <input
-                          type="text"
-                          value={params.textPrefix}
-                          onChange={(e) => handleParamChange('textPrefix', e.target.value)}
-                          placeholder="Préfixe (ex: REF: )"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="displayValue" checked={params.displayValue} onChange={(e) => handleParamChange('displayValue', e.target.checked)} className="rounded border-[#e5e5e5] dark:border-[#404040] text-[#404040] dark:text-[#525252]" />
+                        <label htmlFor="displayValue" className="text-sm text-[#525252] dark:text-[#a3a3a3]">Afficher la valeur</label>
                       </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Suffixe du texte
-                        </label>
-                        <input
-                          type="text"
-                          value={params.textSuffix}
-                          onChange={(e) => handleParamChange('textSuffix', e.target.value)}
-                          placeholder="Suffixe (ex: €, kg, etc.)"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Taille de police: {params.fontSize}px
-                        </label>
-                        <input
-                          type="range"
-                          min="8"
-                          max="40"
-                          value={params.fontSize}
-                          onChange={(e) => handleParamChange('fontSize', parseInt(e.target.value))}
-                          className="w-full"
-                        />
-                      </div>
-
-
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Alignement
-                          </label>
-                          <select
-                            value={params.textAlign}
-                            onChange={(e) => handleParamChange('textAlign', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          >
-                            {textAlignments.map(align => (
-                              <option key={align.value} value={align.value}>{align.label}</option>
-                            ))}
-                          </select>
+                      {params.displayValue && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Préfixe</label>
+                            <input type="text" value={params.textPrefix} onChange={(e) => handleParamChange('textPrefix', e.target.value)} placeholder="REF: " className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm" />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Suffixe</label>
+                            <input type="text" value={params.textSuffix} onChange={(e) => handleParamChange('textSuffix', e.target.value)} placeholder="€, kg" className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm" />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Taille police: {params.fontSize}px</label>
+                            <input type="range" min="8" max="40" value={params.fontSize} onChange={(e) => handleParamChange('fontSize', parseInt(e.target.value))} className="w-full" />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Alignement</label>
+                            <select value={params.textAlign} onChange={(e) => handleParamChange('textAlign', e.target.value)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm">
+                              {textAlignments.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] mb-1">Position</label>
+                            <select value={params.textPosition} onChange={(e) => handleParamChange('textPosition', e.target.value)} className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-md bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm">
+                              {textPositions.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                            </select>
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Position
-                          </label>
-                          <select
-                            value={params.textPosition}
-                            onChange={(e) => handleParamChange('textPosition', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          >
-                            {textPositions.map(pos => (
-                              <option key={pos.value} value={pos.value}>{pos.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Marge texte: {params.textMargin}px
-                        </label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="10"
-                          value={params.textMargin}
-                          onChange={(e) => handleParamChange('textMargin', parseInt(e.target.value))}
-                          className="w-full"
-                        />
-                      </div>
+                      )}
                     </>
                   )}
-                </>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Panneau d'aperçu et résultats */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Aperçu</h2>
-            
-            {/* Aperçu de l&apos;image */}
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6 min-h-[200px]">
-              {params.gradientMode && (
-                <div className="mb-4 text-center">
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
-                    Mode Dégradé - Aperçu: SVG | Téléchargement: {params.format.toUpperCase()}
-                  </span>
-                </div>
+          {/* Aperçu et actions */}
+          <div className="flex flex-col">
+            <div className="bg-white dark:bg-[#171717] border border-[#e5e5e5] dark:border-[#262626] rounded-xl p-8 flex items-center justify-center min-h-[280px] flex-1">
+              {previewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt="Aperçu"
+                  className="max-w-full max-h-[240px] object-contain"
+                  style={{ backgroundColor: !params.gradientMode ? params.backgroundColor : 'transparent', padding: 12, borderRadius: 8 }}
+                />
+              ) : (
+                <p className="text-[#a3a3a3] dark:text-[#525252] text-sm">Aperçu</p>
               )}
-              <div className="flex items-center justify-center">
-                {previewUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={previewUrl}
-                    alt="Code généré"
-                    className="max-w-full max-h-[300px] object-contain"
-                    style={{ 
-                      backgroundColor: !params.gradientMode ? params.backgroundColor : 'transparent',
-                      padding: '10px',
-                      borderRadius: '4px'
-                    }}
-                    onError={(e) => {
-                      console.error('Erreur de chargement de l\'aperçu:', e);
-                      e.target.style.display = 'none';
-                    }}
-                    onLoad={() => {
-                      console.log('Aperçu chargé avec succès:', previewUrl);
-                    }}
-                  />
-                ) : (
-                  <div className="text-center text-gray-500 dark:text-gray-400">
-                    <p>Aucun aperçu disponible</p>
-                    <p className="text-sm">Vérifiez vos paramètres</p>
-                  </div>
-                )}
-              </div>
             </div>
 
-            {/* Boutons d'action */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-3 mt-6">
               <button
                 onClick={downloadImage}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                className="flex-1 py-3 px-4 bg-[#171717] dark:bg-[#ededed] text-white dark:text-[#0a0a0a] text-sm font-medium rounded-lg hover:bg-[#404040] dark:hover:bg-white transition-colors"
               >
                 Télécharger
               </button>
               <button
                 onClick={copyApiUrl}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                className={`flex-1 py-3 px-4 border rounded-lg text-sm font-medium transition-colors ${copied ? 'border-[#404040] dark:border-[#525252] bg-[#f5f5f5] dark:bg-[#262626] text-[#171717] dark:text-[#ededed]' : 'border-[#e5e5e5] dark:border-[#404040] text-[#525252] dark:text-[#a3a3a3] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]'}`}
               >
-                Copier URL API
+                {copied ? 'Copié !' : "Copier l'URL"}
               </button>
             </div>
 
-            {/* URL de l&apos;API */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                URL de l&apos;API
-              </label>
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-3 font-mono text-sm text-gray-800 dark:text-gray-200 break-all">
-                {fullApiUrl || apiUrl}
-              </div>
-            </div>
-
-            {/* Exemple d&apos;utilisation */}
             <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Exemples d&apos;utilisation
-              </label>
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-3 font-mono text-sm text-gray-800 dark:text-gray-200 overflow-x-auto break-all">
-                <div className="mb-2"># QR Code simple:</div>
-                <div className="mb-2">/api/generate?value=Hello&type=qrcode</div>
-                <div className="mb-2"># Code barres avec couleur:</div>
-                <div className="mb-2">/api/generate?value=123456789&type=code128&color=%23ff0000</div>
-                <div className="mb-2"># Data Matrix personnalisé:</div>
-                <div className="mb-2">/api/generate?value=Test&type=datamatrix&width=300&backgroundColor=%23f0f0f0</div>
-                <div className="mb-2"># Data Matrix 24x24 forcé:</div>
-                <div className="mb-2">/api/generate?value=ABC&type=datamatrix&dataMatrixSize=24</div>
-                <div className="mb-2"># QR Code transparent:</div>
-                <div className="mb-2">/api/generate?value=Transparent&type=qrcode&transparent=true&format=png</div>
-                <div className="mb-2"># Code barres avec préfixe et suffixe:</div>
-                <div className="mb-2">/api/generate?value=123456&type=code128&textPrefix=REF:%20&textSuffix=%20€</div>
-                <div className="mb-2"># EAN avec suffixe kg:</div>
-                <div className="mb-2">/api/generate?value=1234567890123&type=ean13&textSuffix=%20kg</div>
-                <div className="mb-2"># QR Code WiFi WPA:</div>
-                <div className="mb-2">/api/generate?type=qrcode&wifiMode=true&wifiSSID=MonReseau&wifiPassword=motdepasse&wifiSecurity=WPA</div>
-                <div className="mb-2"># QR Code WiFi sans mot de passe:</div>
-                <div className="mb-2">/api/generate?type=qrcode&wifiMode=true&wifiSSID=ReseauPublic&wifiSecurity=nopass</div>
-                <div className="mb-2"># QR Code avec dégradé horizontal:</div>
-                <div className="mb-2">/api/generate?value=Hello&type=qrcode&gradientMode=true&gradientColors=%23000000,%23ff0000,%23ffff00&gradientDirection=horizontal&format=svg</div>
-                <div className="mb-2"># Code barres dégradé vertical:</div>
-                <div className="mb-2">/api/generate?value=123456&type=code128&gradientMode=true&gradientColors=%230066cc,%2300ffcc&gradientDirection=vertical&format=svg</div>
-                <div className="mb-2"># Data Matrix dégradé radial:</div>
-                <div>/api/generate?value=Test&type=datamatrix&gradientMode=true&gradientColors=%23ff6b35,%23f7931e,%23ffd700&gradientDirection=radial&format=svg</div>
+              <label className="block text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-2">URL API</label>
+              <div className="bg-[#f5f5f5] dark:bg-[#171717] border border-[#e5e5e5] dark:border-[#262626] rounded-lg p-3 font-mono text-xs text-[#525252] dark:text-[#a3a3a3] break-all">
+                {fullApiUrl || '—'}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+    </svg>
   );
 }
