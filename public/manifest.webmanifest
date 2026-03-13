@@ -1,0 +1,24 @@
+{
+  "name": "Generate — Suite d'outils en ligne",
+  "short_name": "Generate",
+  "description": "11 outils en ligne gratuits : conversion, compression, QR code, générateur PWA, audit de performance et plus.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "lang": "fr",
+  "scope": "/",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "any", "type": "image/x-icon" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Convertir une image", "url": "/convert", "description": "Convertisseur d'image PNG, JPEG, WebP" },
+    { "name": "Générer un QR Code", "url": "/generate", "description": "Générateur QR Code et Data Matrix" },
+    { "name": "Audit de performance", "url": "/audit", "description": "Audit de performance web" }
+  ]
+}

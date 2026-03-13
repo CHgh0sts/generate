@@ -11,7 +11,10 @@
   "dependencies": {
     "bwip-js": "^4.7.0",
     "canvas": "^3.1.2",
+    "ffmpeg-static": "^5.3.0",
+    "fluent-ffmpeg": "^2.1.3",
     "jsbarcode": "^3.12.1",
+    "jszip": "^3.10.1",
     "next": "15.4.5",
     "puppeteer": "^24.15.0",
     "qrcode": "^1.5.4",
