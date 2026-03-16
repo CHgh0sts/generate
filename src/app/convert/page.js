@@ -15,6 +15,7 @@ const formats = [
   { value: 'gif',  label: 'GIF' },
   { value: 'tiff', label: 'TIFF' },
   { value: 'ico',  label: 'ICO' },
+  { value: 'bmp',  label: 'BMP' },
 ];
 
 const icoPresets = [

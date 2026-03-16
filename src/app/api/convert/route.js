@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 
-const OUTPUT_FORMATS = ['jpeg', 'png', 'webp', 'avif', 'gif', 'tiff', 'ico'];
+const OUTPUT_FORMATS = ['jpeg', 'png', 'webp', 'avif', 'gif', 'tiff', 'ico', 'bmp'];
 
 // ICO_SIZES_MAP: preset name → list of pixel sizes to embed in the ICO
 const ICO_PRESETS = {
@@ -99,6 +99,7 @@ export async function POST(request) {
       case 'avif': pipeline = pipeline.avif({ quality: 80 }); break;
       case 'gif':  pipeline = pipeline.gif();                 break;
       case 'tiff': pipeline = pipeline.tiff();                break;
+      case 'bmp':  pipeline = pipeline.bmp();                 break;
       default:     pipeline = pipeline.png();
     }
 

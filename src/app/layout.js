@@ -19,9 +19,9 @@ export const metadata = {
     'audit performance web', 'convertisseur vidéo', 'convertisseur audio', 'Base64', 'mots de passe',
     'convertisseur unités', 'gratuit', 'sans inscription',
   ],
-  authors: [{ name: 'Generate', url: BASE_URL }],
-  creator: 'Generate',
-  publisher: 'Generate',
+  authors: [{ name: 'CHghosts', url: BASE_URL }],
+  creator: 'CHghosts',
+  publisher: 'CHghosts',
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
