@@ -52,12 +52,24 @@ export default function IpPage() {
 
   const isIP = (s) => /^[\d.]+$/.test(s) || /^[0-9a-fA-F:]+$/.test(s);
 
+  // Normalize: strip protocol/path if user enters a full URL
+  function normalize(raw) {
+    const s = raw.trim();
+    if (!s) return '';
+    try {
+      if (/^https?:\/\//i.test(s)) return new URL(s).hostname;
+    } catch {}
+    return s.replace(/\/.*$/, '').trim(); // strip path
+  }
+
   async function run(q = query) {
+    const normalized = normalize(q);
+    if (q.trim() && normalized !== q.trim()) setQuery(normalized);
     setLoading(true); setError(''); setResult(null); setDns([]); setRdns([]);
     try {
-      const data = await lookup(q);
+      const data = await lookup(normalized);
       setResult(data);
-      const host = q.trim();
+      const host = normalized;
       if (host && !isIP(host)) {
         const ips = await dnsLookup(host).catch(() => []);
         setDns(ips);
@@ -106,13 +118,13 @@ export default function IpPage() {
         <div className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-5">
           <label className="text-xs font-semibold uppercase tracking-wider text-[#737373] dark:text-[#a3a3a3] block mb-3">IP ou nom de domaine</label>
           <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a3a3a3] pointer-events-none" />
+            <div className="flex flex-1 items-center gap-2 border border-[#e5e5e5] dark:border-[#262626] rounded-xl bg-[#fafafa] dark:bg-[#0a0a0a] px-3 focus-within:ring-2"
+              style={{ '--tw-ring-color': ACCENT }}>
+              <Search className="w-4 h-4 text-[#a3a3a3] shrink-0 pointer-events-none" />
               <input type="text" value={query} onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && run()}
                 placeholder="8.8.8.8, google.com… (vide = votre IP)"
-                className="w-full pl-11 pr-4 py-2.5 border border-[#e5e5e5] dark:border-[#262626] rounded-xl text-sm bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2"
-                style={{ '--tw-ring-color': ACCENT }} />
+                className="flex-1 py-2.5 bg-transparent text-sm text-[#171717] dark:text-[#ededed] focus:outline-none placeholder:text-[#a3a3a3]" />
             </div>
             <button onClick={() => run()}
               style={{ backgroundColor: ACCENT }}
