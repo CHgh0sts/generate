@@ -48,6 +48,9 @@ export default function ResizePage() {
   const [lockRatio, setLockRatio] = useState(true);
   const [fit, setFit]             = useState('inside');
   const [format, setFormat]       = useState('original');
+  const [rotate, setRotate]       = useState(0);
+  const [flipH, setFlipH]         = useState(false);
+  const [flipV, setFlipV]         = useState(false);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState(null);
   const [result, setResult]       = useState(null);
@@ -172,6 +175,9 @@ export default function ResizePage() {
       if (height) formData.append('height', height);
       formData.append('fit', fit);
       formData.append('format', format);
+      if (rotate) formData.append('rotate', String(rotate));
+      if (flipH) formData.append('flipH', 'true');
+      if (flipV) formData.append('flipV', 'true');
       const res = await fetch('/api/resize', { method: 'POST', body: formData });
       if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || `Erreur ${res.status}`); }
       const blob     = await res.blob();
@@ -199,6 +205,7 @@ export default function ResizePage() {
     if (result?.url) URL.revokeObjectURL(result.url);
     setFile(null); setPreview(null); setOrigDims({ w: 0, h: 0 });
     setWidth(''); setHeight(''); setLockRatio(true); setFit('inside'); setFormat('original');
+    setRotate(0); setFlipH(false); setFlipV(false);
     setError(null); setResult(null); setModalOpen(false);
     imgRef.current = null;
     if (canvasRef.current) { const ctx = canvasRef.current.getContext('2d'); ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height); }
@@ -324,6 +331,31 @@ export default function ResizePage() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Rotation / Flip */}
+            <div>
+              <label className="block text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-2">Rotation & Retournement</label>
+              <div className="flex flex-wrap gap-2">
+                {[0, 90, 180, 270].map(deg => (
+                  <button key={deg} onClick={() => setRotate(deg)}
+                    style={rotate === deg ? { backgroundColor: ACCENT } : {}}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${rotate === deg ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
+                    {deg === 0 ? 'Normal' : `↻ ${deg}°`}
+                  </button>
+                ))}
+                <div className="h-px w-px self-stretch" />
+                <button onClick={() => setFlipH(!flipH)}
+                  style={flipH ? { backgroundColor: ACCENT } : {}}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flipH ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
+                  ⇔ Miroir H
+                </button>
+                <button onClick={() => setFlipV(!flipV)}
+                  style={flipV ? { backgroundColor: ACCENT } : {}}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flipV ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
+                  ⇕ Miroir V
+                </button>
+              </div>
             </div>
 
             {/* Fit + Format */}

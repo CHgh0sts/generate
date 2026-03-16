@@ -2,9 +2,9 @@ const BASE = 'https://generate.chghosts.fr';
 
 export default function sitemap() {
   const routes = [
-    '', '/convert', '/compress', '/resize',
+    '', '/convert', '/compress', '/resize', '/watermark',
     '/convert-video', '/convert-audio',
-    '/json', '/markdown', '/regex', '/text', '/data',
+    '/json', '/minify', '/markdown', '/regex', '/text', '/data', '/ascii',
     '/colors',
     '/hash', '/uuid', '/url', '/cron',
     '/pdf',

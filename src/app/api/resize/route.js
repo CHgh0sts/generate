@@ -10,12 +10,12 @@ export async function POST(request) {
     const height = formData.get('height') ? Number(formData.get('height')) : null;
     const fit = formData.get('fit') || 'inside';
     const format = (formData.get('format') || 'original').toLowerCase();
+    const rotate = formData.get('rotate') ? Number(formData.get('rotate')) : 0;
+    const flipH = formData.get('flipH') === 'true';
+    const flipV = formData.get('flipV') === 'true';
 
     if (!file || !(file instanceof Blob)) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
-    }
-    if (!width && !height) {
-      return NextResponse.json({ error: 'Largeur ou hauteur requise' }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -27,12 +27,22 @@ export async function POST(request) {
 
     const meta = await sharp(buffer).metadata();
 
-    let pipeline = sharp(buffer).resize({
-      width: width || undefined,
-      height: height || undefined,
-      fit,
-      withoutEnlargement: false,
-    });
+    let pipeline = sharp(buffer);
+
+    // Rotation
+    if (rotate) pipeline = pipeline.rotate(rotate);
+    if (flipH) pipeline = pipeline.flop();
+    if (flipV) pipeline = pipeline.flip();
+
+    // Resize (optional if only rotate/flip)
+    if (width || height) {
+      pipeline = pipeline.resize({
+        width: width || undefined,
+        height: height || undefined,
+        fit,
+        withoutEnlargement: false,
+      });
+    }
 
     if (outputFormat === 'jpeg') pipeline = pipeline.jpeg({ quality: 92 });
     else if (outputFormat === 'png') pipeline = pipeline.png();

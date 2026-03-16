@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { Modal } from '../Modal';
@@ -41,6 +41,8 @@ export default function ConvertPage() {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [sliderPos, setSliderPos] = useState(50);
   const fileInputRef = useRef(null);
 
   const handleFile = (selected) => {
@@ -272,22 +274,57 @@ export default function ConvertPage() {
             </button>
           </div>
           {result?.url && (
-            <div className="rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-[#262626] bg-[#f5f5f5] dark:bg-[#0a0a0a] flex items-center justify-center p-4 min-h-40">
-              {result.format === 'ico' ? (
-                <div className="text-center space-y-3">
-                  <div className="w-16 h-16 mx-auto rounded-xl border-2 border-dashed border-[#e5e5e5] dark:border-[#404040] flex items-center justify-center bg-white dark:bg-[#171717]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={result.url} alt="Favicon ICO" className="w-10 h-10 object-contain" />
-                  </div>
-                  <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">Fichier .ico multi-tailles</p>
-                  <p className="text-[10px] text-[#a3a3a3]">
-                    {icoPresets.find(p => p.value === icoPreset)?.desc || ''}
-                  </p>
+            <div className="space-y-3">
+              {/* Compare toggle (non-ICO only) */}
+              {result.format !== 'ico' && preview && (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setCompareMode(!compareMode)}
+                    style={compareMode ? { backgroundColor: ACCENT } : {}}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${compareMode ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
+                    ⇔ Comparaison avant/après
+                  </button>
+                  {compareMode && <span className="text-xs text-[#737373] dark:text-[#a3a3a3]">Glissez le curseur</span>}
                 </div>
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={result.url} alt="Résultat" className="max-h-80 max-w-full object-contain rounded-lg" />
               )}
+              <div className="rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-[#262626] bg-[#f5f5f5] dark:bg-[#0a0a0a] flex items-center justify-center min-h-40">
+                {result.format === 'ico' ? (
+                  <div className="text-center space-y-3 p-4">
+                    <div className="w-16 h-16 mx-auto rounded-xl border-2 border-dashed border-[#e5e5e5] dark:border-[#404040] flex items-center justify-center bg-white dark:bg-[#171717]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={result.url} alt="Favicon ICO" className="w-10 h-10 object-contain" />
+                    </div>
+                    <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">Fichier .ico multi-tailles</p>
+                    <p className="text-[10px] text-[#a3a3a3]">{icoPresets.find(p => p.value === icoPreset)?.desc || ''}</p>
+                  </div>
+                ) : compareMode && preview ? (
+                  /* Before / After slider */
+                  <div className="relative w-full select-none" style={{ maxHeight: '320px' }}>
+                    {/* After (converted) — full width */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={result.url} alt="Après" className="w-full max-h-80 object-contain" />
+                    {/* Before (original) — clipped to left side */}
+                    <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={preview} alt="Avant" className="w-full max-h-80 object-contain" style={{ width: `${10000 / sliderPos}%`, maxWidth: 'none' }} />
+                    </div>
+                    {/* Divider line */}
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg" style={{ left: `${sliderPos}%` }}>
+                      <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center border border-[#e5e5e5]">
+                        <svg className="w-4 h-4 text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l-4 3 4 3M16 9l4 3-4 3" /></svg>
+                      </div>
+                    </div>
+                    {/* Slider */}
+                    <input type="range" min={0} max={100} value={sliderPos} onChange={e => setSliderPos(Number(e.target.value))}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize" />
+                    {/* Labels */}
+                    <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded">Avant</div>
+                    <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded">Après</div>
+                  </div>
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={result.url} alt="Résultat" className="max-h-80 max-w-full object-contain rounded-lg p-4" />
+                )}
+              </div>
             </div>
           )}
         </div>

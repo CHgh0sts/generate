@@ -7,9 +7,10 @@ const groups = [
   {
     label: 'Images',
     tools: [
-      { href: '/convert',  color: '#2563eb', title: "Convertisseur d'image",        description: 'PNG, JPEG, WebP, AVIF, GIF, TIFF, ICO, BMP — conversion instantanée.' },
-      { href: '/compress', color: '#0891b2', title: "Compresseur d'images",          description: 'Réduisez le poids de vos images avec slider de qualité.' },
-      { href: '/resize',   color: '#059669', title: "Redimensionneur d'images",      description: 'Redimensionnez avec aperçu en temps réel et modes de cadrage.' },
+      { href: '/convert',    color: '#2563eb', title: "Convertisseur d'image",        description: 'PNG, JPEG, WebP, AVIF, GIF, TIFF, ICO, BMP — comparaison avant/après.' },
+      { href: '/compress',   color: '#0891b2', title: "Compresseur d'images",          description: 'Réduisez le poids de vos images avec slider de qualité.' },
+      { href: '/resize',     color: '#059669', title: "Redimensionneur d'images",      description: 'Redimensionnez, faites pivoter, retournez — aperçu en temps réel.' },
+      { href: '/watermark',  color: '#7c3aed', title: 'Filigrane sur image',           description: 'Ajoutez un texte watermark personnalisé — position, opacité, couleur, mode tuilé.' },
     ],
   },
   {
@@ -23,10 +24,12 @@ const groups = [
     label: 'Texte & Code',
     tools: [
       { href: '/json',     color: '#16a34a', title: 'JSON Tools',                   description: 'Formatez, validez, minifiez et explorez des données JSON.' },
+      { href: '/minify',   color: '#c026d3', title: 'Minify / Beautify',             description: 'Minifiez ou formatez du HTML, CSS, JavaScript et JSON.' },
       { href: '/markdown', color: '#0369a1', title: 'Éditeur Markdown',              description: 'Éditeur split-view avec export HTML/MD et barre d\'outils.' },
       { href: '/regex',    color: '#9333ea', title: 'Regex Tester',                  description: 'Testez vos expressions régulières avec cheat sheet intégrée.' },
       { href: '/text',     color: '#f472b6', title: 'Outils texte',                  description: 'Lorem ipsum, compteur de mots/caractères, diff de texte.' },
       { href: '/data',     color: '#b45309', title: 'Convertisseur de données',      description: 'CSV↔JSON, JSON↔YAML, validation JSON/YAML/XML.' },
+      { href: '/ascii',    color: '#f97316', title: 'ASCII Art Generator',            description: 'Convertissez du texte en ASCII art avec polices et encadrements.' },
     ],
   },
   {
