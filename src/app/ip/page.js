@@ -161,17 +161,48 @@ export default function IpPage() {
               <div className="flex items-center gap-2 px-4 py-3 border-b border-[#f5f5f5] dark:border-[#1a1a1a]">
                 <MapPin className="w-3.5 h-3.5" style={{ color: ACCENT }} />
                 <span className="text-xs font-semibold text-[#171717] dark:text-[#ededed]">Géolocalisation</span>
+                {result.latitude && result.longitude && (
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${result.latitude}&mlon=${result.longitude}&zoom=10`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="ml-auto text-[10px] flex items-center gap-1 text-[#a3a3a3] hover:text-[#525252] dark:hover:text-[#d4d4d4]"
+                  >
+                    <MapPin className="w-3 h-3" /> Ouvrir OSM
+                  </a>
+                )}
               </div>
               <div className="p-4">
-                {result.flag?.emoji && (
-                  <div className="text-4xl mb-3">{result.flag.emoji}</div>
+                <div className="flex items-start gap-3 mb-3">
+                  {result.flag?.emoji && <span className="text-3xl">{result.flag.emoji}</span>}
+                  <div className="flex-1 min-w-0">
+                    <Row icon={MapPin} label="Pays" value={result.country && result.country_code ? `${result.country} (${result.country_code})` : result.country} color={ACCENT} />
+                    <Row icon={MapPin} label="Région" value={result.region} color={ACCENT} />
+                    <Row icon={MapPin} label="Ville" value={result.city} color={ACCENT} />
+                    <Row icon={MapPin} label="Code postal" value={result.postal} color={ACCENT} />
+                    <Row icon={Clock} label="Fuseau" value={result.timezone?.id} color={ACCENT} />
+                  </div>
+                </div>
+
+                {/* OpenStreetMap embed */}
+                {result.latitude && result.longitude && (
+                  <div className="rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-[#262626] mt-1">
+                    <iframe
+                      title="Carte"
+                      width="100%"
+                      height="200"
+                      loading="lazy"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${result.longitude - 0.05},${result.latitude - 0.05},${result.longitude + 0.05},${result.latitude + 0.05}&layer=mapnik&marker=${result.latitude},${result.longitude}`}
+                      className="block w-full"
+                      style={{ border: 0 }}
+                    />
+                    <div className="px-3 py-1.5 bg-[#fafafa] dark:bg-[#0a0a0a] border-t border-[#e5e5e5] dark:border-[#262626] flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-[#a3a3a3]">
+                        {result.latitude.toFixed(5)}, {result.longitude.toFixed(5)}
+                      </span>
+                      <span className="text-[10px] text-[#a3a3a3]">© OpenStreetMap</span>
+                    </div>
+                  </div>
                 )}
-                <Row icon={MapPin} label="Pays" value={`${result.country} (${result.country_code})`} color={ACCENT} />
-                <Row icon={MapPin} label="Région" value={result.region} color={ACCENT} />
-                <Row icon={MapPin} label="Ville" value={result.city} color={ACCENT} />
-                <Row icon={MapPin} label="Code postal" value={result.postal} color={ACCENT} />
-                <Row icon={MapPin} label="Coordonnées" value={result.latitude && result.longitude ? `${result.latitude.toFixed(4)}, ${result.longitude.toFixed(4)}` : null} color={ACCENT} />
-                <Row icon={Clock} label="Fuseau" value={result.timezone?.id} color={ACCENT} />
               </div>
             </div>
 
