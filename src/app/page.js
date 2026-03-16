@@ -1,7 +1,6 @@
-'use client';
-
 import Link from 'next/link';
 import { ThemeToggle } from './ThemeToggle';
+import { ToolCard } from './ToolCard';
 
 const groups = [
   {
@@ -66,9 +65,9 @@ const groups = [
   },
 ];
 
-export default function Home() {
-  const totalTools = groups.reduce((s, g) => s + g.tools.length, 0);
+const totalTools = groups.reduce((s, g) => s + g.tools.length, 0);
 
+export default function Home() {
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a]">
       <header className="border-b border-[#e5e5e5] dark:border-[#262626] bg-white dark:bg-[#171717]">
@@ -100,24 +99,7 @@ export default function Home() {
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {group.tools.map((tool) => (
                   <li key={tool.href}>
-                    <Link
-                      href={tool.href}
-                      style={{ '--tool-color': tool.color, borderColor: tool.color + '40' }}
-                      className="flex h-full flex-col rounded-xl border bg-white dark:bg-[#171717] p-4 hover:-translate-y-0.5 hover:shadow-md transition-all group"
-                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = tool.color)}
-                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = tool.color + '40')}
-                    >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tool.color }} />
-                        <h4 className="text-sm font-medium text-[#171717] dark:text-[#ededed]">
-                          {tool.title}
-                        </h4>
-                      </div>
-                      <p className="text-xs text-[#737373] dark:text-[#a3a3a3] flex-1 leading-relaxed pl-4">{tool.description}</p>
-                      <span className="mt-3 pl-4 inline-flex items-center text-xs font-medium transition-colors" style={{ color: tool.color }}>
-                        Ouvrir <span className="ml-1 text-[10px]">→</span>
-                      </span>
-                    </Link>
+                    <ToolCard {...tool} />
                   </li>
                 ))}
               </ul>
