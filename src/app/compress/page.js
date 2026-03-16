@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { Modal } from '../Modal';
+import { useToast } from '../Toast';
 
 const ACCENT = '#0891b2';
 
@@ -27,6 +28,45 @@ function pct(original, compressed) {
   return Math.round((1 - compressed / original) * 100);
 }
 
+// Before/after comparison slider
+function CompareSlider({ before, after }) {
+  const [pos, setPos] = useState(50);
+  const containerRef = useRef();
+
+  const onMove = useCallback((clientX) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const p = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    setPos(p);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative select-none overflow-hidden rounded-xl border border-[#e5e5e5] dark:border-[#262626] cursor-ew-resize"
+      onMouseMove={e => { if (e.buttons) onMove(e.clientX); }}
+      onMouseDown={e => onMove(e.clientX)}
+      onTouchMove={e => onMove(e.touches[0].clientX)}
+    >
+      {/* After (base) */}
+      <img src={after} alt="Après" className="w-full max-h-64 object-contain block" />
+      {/* Before (clipped) */}
+      <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
+        <img src={before} alt="Avant" className="w-full max-h-64 object-contain block" />
+      </div>
+      {/* Divider */}
+      <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg" style={{ left: `${pos}%` }}>
+        <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center">
+          <svg className="w-4 h-4 text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l-3 3 3 3M16 9l3 3-3 3" />
+          </svg>
+        </div>
+      </div>
+      {/* Labels */}
+      <div className="absolute top-2 left-2 text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full">Avant</div>
+      <div className="absolute top-2 right-2 text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full">Après</div>
+    </div>
+  );
+}
+
 export default function CompressPage() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -37,6 +77,7 @@ export default function CompressPage() {
   const [result, setResult] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const fileInputRef = useRef(null);
+  const pushToast = useToast();
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -79,6 +120,7 @@ export default function CompressPage() {
       const filename = (res.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/)?.[1] || 'compressed.jpg';
       setResult({ url, originalSize, compressedSize, filename });
       setModalOpen(true);
+      pushToast?.(`Image compressée — ${pct(originalSize, compressedSize)}% de réduction`);
     } catch (err) {
       setError(err.message || 'Erreur lors de la compression');
     } finally {
@@ -249,10 +291,8 @@ export default function CompressPage() {
               Télécharger
             </button>
           </div>
-          {result?.url && (
-            <div className="rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-[#262626] bg-[#f5f5f5] dark:bg-[#0a0a0a] flex items-center justify-center p-4">
-              <img src={result.url} alt="Résultat" className="max-h-72 max-w-full object-contain rounded-lg" />
-            </div>
+          {result?.url && preview && (
+            <CompareSlider before={preview} after={result.url} />
           )}
         </div>
       </Modal>

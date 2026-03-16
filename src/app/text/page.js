@@ -39,19 +39,99 @@ function textStats(text) {
   };
 }
 
-// Simple line-based diff
+// LCS-based diff for arrays
+function lcs(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Uint16Array(n + 1));
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  const seq = [];
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (a[i-1] === b[j-1]) { seq.unshift({ type: 'same', val: a[i-1] }); i--; j--; }
+    else if (dp[i-1][j] > dp[i][j-1]) { seq.unshift({ type: 'del', val: a[i-1] }); i--; }
+    else { seq.unshift({ type: 'add', val: b[j-1] }); j--; }
+  }
+  while (i > 0) { seq.unshift({ type: 'del', val: a[i-1] }); i--; }
+  while (j > 0) { seq.unshift({ type: 'add', val: b[j-1] }); j--; }
+  return seq;
+}
+
+// Word-level highlighting for changed lines
+function wordDiff(textA, textB) {
+  const wA = textA.split(/(\s+)/);
+  const wB = textB.split(/(\s+)/);
+  if (wA.length > 200 || wB.length > 200) return null; // fallback for large lines
+  return lcs(wA, wB);
+}
+
+// Line-based diff with word-level highlighting
 function computeDiff(a, b) {
   const aLines = a.split('\n');
   const bLines = b.split('\n');
+
+  // Use LCS on lines (limit for performance)
+  if (aLines.length > 500 || bLines.length > 500) {
+    const result = [];
+    let i = 0, j = 0;
+    while (i < aLines.length || j < bLines.length) {
+      if (i >= aLines.length) { result.push({ type: 'add', text: bLines[j++] }); continue; }
+      if (j >= bLines.length) { result.push({ type: 'del', text: aLines[i++] }); continue; }
+      if (aLines[i] === bLines[j]) { result.push({ type: 'same', text: aLines[i] }); i++; j++; }
+      else { result.push({ type: 'del', text: aLines[i++] }); result.push({ type: 'add', text: bLines[j++] }); }
+    }
+    return result;
+  }
+
+  const lineDiff = lcs(aLines, bLines);
   const result = [];
-  let i = 0, j = 0;
-  while (i < aLines.length || j < bLines.length) {
-    if (i >= aLines.length) { result.push({ type: 'add', text: bLines[j++] }); continue; }
-    if (j >= bLines.length) { result.push({ type: 'del', text: aLines[i++] }); continue; }
-    if (aLines[i] === bLines[j]) { result.push({ type: 'same', text: aLines[i] }); i++; j++; }
-    else { result.push({ type: 'del', text: aLines[i++] }); result.push({ type: 'add', text: bLines[j++] }); }
+
+  // Pair up consecutive del/add for word-level highlight
+  for (let k = 0; k < lineDiff.length; k++) {
+    const cur = lineDiff[k];
+    const nxt = lineDiff[k + 1];
+    if (cur.type === 'del' && nxt?.type === 'add') {
+      const words = wordDiff(cur.val, nxt.val);
+      result.push({ type: 'del', text: cur.val, words });
+      result.push({ type: 'add', text: nxt.val, words: words ? lcs(cur.val.split(/(\s+)/), nxt.val.split(/(\s+)/)) : null });
+      k++;
+    } else {
+      result.push({ type: cur.type === 'same' ? 'same' : cur.type, text: cur.val });
+    }
   }
   return result;
+}
+
+function DiffLine({ line }) {
+  const bg = line.type === 'add' ? 'bg-green-50 dark:bg-green-950/30 text-green-800 dark:text-green-300'
+           : line.type === 'del' ? 'bg-red-50 dark:bg-red-950/30 text-red-800 dark:text-red-300'
+           : 'text-[#525252] dark:text-[#a3a3a3]';
+  const sign = line.type === 'add' ? '+' : line.type === 'del' ? '−' : ' ';
+
+  if (!line.words) {
+    return (
+      <div className={`px-4 py-1 flex gap-3 ${bg}`}>
+        <span className="select-none shrink-0 w-4 text-center">{sign}</span>
+        <span className="whitespace-pre-wrap break-all">{line.text || ' '}</span>
+      </div>
+    );
+  }
+
+  // Word-level highlights
+  const isAdd = line.type === 'add';
+  const tokens = line.words.filter(w => w.type === 'same' || w.type === (isAdd ? 'add' : 'del'));
+  return (
+    <div className={`px-4 py-1 flex gap-3 ${bg}`}>
+      <span className="select-none shrink-0 w-4 text-center">{sign}</span>
+      <span className="whitespace-pre-wrap break-all">
+        {tokens.map((w, i) => (
+          w.type === 'same'
+            ? <span key={i}>{w.val}</span>
+            : <mark key={i} className={`rounded px-0.5 ${isAdd ? 'bg-green-300 dark:bg-green-700 text-green-900 dark:text-green-100' : 'bg-red-300 dark:bg-red-700 text-red-900 dark:text-red-100'}`}>{w.val}</mark>
+        ))}
+      </span>
+    </div>
+  );
 }
 
 export default function TextPage() {
@@ -184,12 +264,7 @@ export default function TextPage() {
                   <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-[#f5f5f5] dark:bg-[#262626] border border-[#e5e5e5] dark:border-[#404040]" />Inchangé ({diff.filter(d=>d.type==='same').length})</span>
                 </div>
                 <div className="font-mono text-xs overflow-auto max-h-96">
-                  {diff.map((line, i) => (
-                    <div key={i} className={`px-4 py-1 flex gap-3 ${line.type === 'add' ? 'bg-green-50 dark:bg-green-950/30 text-green-800 dark:text-green-300' : line.type === 'del' ? 'bg-red-50 dark:bg-red-950/30 text-red-800 dark:text-red-300' : 'text-[#525252] dark:text-[#a3a3a3]'}`}>
-                      <span className="select-none shrink-0 w-4 text-center">{line.type === 'add' ? '+' : line.type === 'del' ? '−' : ' '}</span>
-                      <span className="whitespace-pre-wrap break-all">{line.text || ' '}</span>
-                    </div>
-                  ))}
+                  {diff.map((line, i) => <DiffLine key={i} line={line} />)}
                 </div>
               </div>
             )}

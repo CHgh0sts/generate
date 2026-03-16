@@ -1,8 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Check, X, XCircle, ArrowRight } from 'lucide-react';
+import { Check, X, XCircle, Clock, Trash2 } from 'lucide-react';
+import { useToast } from '../Toast';
+
+const HISTORY_KEY = 'url_history';
+const MAX_HIST = 20;
 
 const ACCENT = '#06b6d4';
 
@@ -11,18 +15,37 @@ function parseUrl(raw) {
 }
 
 export default function UrlPage() {
-  const [tab, setTab]         = useState('encode'); // encode | decode | parse | build
+  const [tab, setTab]         = useState('encode'); // encode | decode | parse | build | history
   const [input, setInput]     = useState('');
   const [copied, setCopied]   = useState('');
+  const [history, setHistory] = useState([]);
   // Build tab
   const [scheme, setScheme]   = useState('https');
   const [host, setHost]       = useState('');
   const [path, setPath]       = useState('');
   const [params, setParams]   = useState([{ k: '', v: '' }]);
   const [fragment, setFragment] = useState('');
+  const pushToast = useToast();
+
+  useEffect(() => {
+    try { setHistory(JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')); } catch {}
+  }, []);
+
+  function saveHistory(url) {
+    try {
+      const prev = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      const next = [url, ...prev.filter(x => x !== url)].slice(0, MAX_HIST);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      setHistory(next);
+    } catch {}
+  }
 
   const copy = (text, id = 'main') => {
-    navigator.clipboard.writeText(text).then(() => { setCopied(id); setTimeout(() => setCopied(''), 1500); });
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(id); setTimeout(() => setCopied(''), 1500);
+      saveHistory(text);
+      pushToast?.('Copié !');
+    });
   };
 
   const encoded = tab === 'encode' ? encodeURIComponent(input) : '';
@@ -40,10 +63,11 @@ export default function UrlPage() {
   })();
 
   const TABS = [
-    { id: 'encode', label: 'Encoder' },
-    { id: 'decode', label: 'Décoder' },
-    { id: 'parse',  label: 'Analyser' },
-    { id: 'build',  label: 'Construire' },
+    { id: 'encode',  label: 'Encoder' },
+    { id: 'decode',  label: 'Décoder' },
+    { id: 'parse',   label: 'Analyser' },
+    { id: 'build',   label: 'Construire' },
+    { id: 'history', label: 'Historique' },
   ];
 
   return (
@@ -190,6 +214,37 @@ export default function UrlPage() {
                 </div>
                 <code className="text-sm font-mono text-[#171717] dark:text-[#ededed] break-all">{builtUrl}</code>
               </div>
+            )}
+          </div>
+        )}
+        {/* History */}
+        {tab === 'history' && (
+          <div className="space-y-3">
+            {history.length === 0 ? (
+              <div className="flex flex-col items-center py-16 text-[#a3a3a3]">
+                <Clock className="w-10 h-10 mb-3 opacity-30" />
+                <p className="text-sm">Aucun historique pour l&apos;instant</p>
+                <p className="text-xs mt-1">Les URLs copiées apparaîtront ici</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-[#a3a3a3]">{history.length} entrée{history.length > 1 ? 's' : ''}</p>
+                  <button onClick={() => { localStorage.removeItem(HISTORY_KEY); setHistory([]); pushToast?.('Historique effacé'); }}
+                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-500">
+                    <Trash2 className="w-3 h-3" /> Effacer tout
+                  </button>
+                </div>
+                {history.map((url, i) => (
+                  <div key={i} className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-3 flex items-center gap-3">
+                    <code className="flex-1 text-xs font-mono text-[#525252] dark:text-[#a3a3a3] truncate">{url}</code>
+                    <button onClick={() => { navigator.clipboard.writeText(url); pushToast?.('Copié !'); }}
+                      className="text-[#a3a3a3] hover:text-[#525252] shrink-0">
+                      {copied === url ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Check className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         )}

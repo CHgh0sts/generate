@@ -1,19 +1,44 @@
-const BASE = 'https://generate.chghosts.fr';
+const BASE_URL = 'https://generate.chghosts.fr';
+
+const routes = [
+  { path: '/',           priority: 1.0,  changeFrequency: 'weekly' },
+  { path: '/convert',    priority: 0.9,  changeFrequency: 'monthly' },
+  { path: '/compress',   priority: 0.9,  changeFrequency: 'monthly' },
+  { path: '/resize',     priority: 0.9,  changeFrequency: 'monthly' },
+  { path: '/watermark',  priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/convert-video', priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/convert-audio', priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/json',       priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/minify',     priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/markdown',   priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/regex',      priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/text',       priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/data',       priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/ascii',      priority: 0.7,  changeFrequency: 'monthly' },
+  { path: '/colors',     priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/hash',       priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/uuid',       priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/url',        priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/cron',       priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/jwt',        priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/css',        priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/svg',        priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/pdf',        priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/generate',   priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/qr-reader',  priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/ip',         priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/password',   priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/base64',     priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/units',      priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/pwa',        priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/audit',      priority: 0.85, changeFrequency: 'monthly' },
+];
 
 export default function sitemap() {
-  const routes = [
-    '', '/convert', '/compress', '/resize', '/watermark',
-    '/convert-video', '/convert-audio',
-    '/json', '/minify', '/markdown', '/regex', '/text', '/data', '/ascii',
-    '/colors',
-    '/hash', '/uuid', '/url', '/cron',
-    '/pdf',
-    '/generate', '/password', '/base64', '/units', '/pwa', '/audit',
-  ];
-  return routes.map((route) => ({
-    url: `${BASE}${route}`,
-    lastModified: new Date().toISOString(),
-    changeFrequency: route === '' ? 'weekly' : 'monthly',
-    priority: route === '' ? 1 : 0.8,
+  return routes.map(({ path, priority, changeFrequency }) => ({
+    url: `${BASE_URL}${path}`,
+    lastModified: new Date(),
+    changeFrequency,
+    priority,
   }));
 }

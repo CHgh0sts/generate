@@ -75,6 +75,8 @@ const jsonLd = {
   author: { '@type': 'Organization', name: 'Generate', url: BASE_URL },
 };
 
+import { ToastProvider } from './Toast';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -96,7 +98,7 @@ export default function RootLayout({ children }) {
         >
           Aller au contenu principal
         </a>
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );
