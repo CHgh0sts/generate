@@ -277,7 +277,8 @@ function AnimationTool() {
 
   const TIMINGS = ['ease', 'ease-in', 'ease-out', 'ease-in-out', 'linear', 'cubic-bezier(0.34,1.56,0.64,1)'];
   const p = PRESETS[preset];
-  const anim = `${preset} ${dur}s ${timing} ${delay}s ${iter}`;
+  const fillMode = iter === 'infinite' ? '' : ' forwards';
+  const anim = `${preset} ${dur}s ${timing} ${delay}s ${iter}${fillMode}`;
   const css = `${p.keyframes}\n\n.element {\n  animation: ${anim};\n}`;
 
   return (
@@ -292,7 +293,7 @@ function AnimationTool() {
         </div>
         <div className="flex items-center justify-center h-28">
           <div key={key} className="w-16 h-16 rounded-xl bg-amber-400"
-            style={{ animation: anim, animationFillMode: 'forwards' }} />
+            style={{ animation: anim }} />
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div>

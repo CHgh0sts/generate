@@ -9,11 +9,10 @@ const ACCENT = '#0ea5e9';
 
 async function lookup(query) {
   const q = query.trim();
-  const url = q ? `https://ipwho.is/${encodeURIComponent(q)}` : 'https://ipwho.is/';
+  const url = `/api/ip${q ? `?q=${encodeURIComponent(q)}` : ''}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  if (!data.success) throw new Error(data.message || 'Introuvable');
+  if (data.error) throw new Error(data.error);
   return data;
 }
 
@@ -112,7 +111,7 @@ export default function IpPage() {
               <input type="text" value={query} onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && run()}
                 placeholder="8.8.8.8, google.com… (vide = votre IP)"
-                className="w-full pl-10 pr-4 py-2.5 border border-[#e5e5e5] dark:border-[#262626] rounded-xl text-sm bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2"
+                className="w-full pl-11 pr-4 py-2.5 border border-[#e5e5e5] dark:border-[#262626] rounded-xl text-sm bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2"
                 style={{ '--tw-ring-color': ACCENT }} />
             </div>
             <button onClick={() => run()}
