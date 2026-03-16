@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Check } from 'lucide-react';
+import { Check, ShieldCheck, ShieldX } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 
 const ACCENT = '#84cc16';
@@ -30,9 +30,13 @@ function computeHash(text, algo) {
 
 export default function HashPage() {
   const [input, setInput]     = useState('');
-  const [mode, setMode]       = useState('text'); // text | file
+  const [mode, setMode]       = useState('text'); // text | file | verify
   const [fileName, setFileName] = useState('');
   const [copied, setCopied]   = useState('');
+  const [verifyText, setVerifyText]   = useState('');
+  const [verifyHash, setVerifyHash]   = useState('');
+  const [verifyAlgo, setVerifyAlgo]   = useState('sha256');
+  const [verifyResult, setVerifyResult] = useState(null);
 
   const hashes = ALGOS.map(a => ({ ...a, value: input ? computeHash(input, a.id) : '' }));
 
@@ -71,12 +75,12 @@ export default function HashPage() {
 
       <main id="main-content" className="max-w-4xl mx-auto px-6 py-8 space-y-6">
         {/* Mode selector */}
-        <div className="flex gap-2">
-          {['text', 'file'].map(m => (
-            <button key={m} onClick={() => { setMode(m); setInput(''); setFileName(''); }}
+        <div className="flex gap-2 flex-wrap">
+          {[['text','Texte'],['file','Fichier'],['verify','Vérification']].map(([m,l]) => (
+            <button key={m} onClick={() => { setMode(m); setInput(''); setFileName(''); setVerifyResult(null); }}
               style={mode === m ? { backgroundColor: ACCENT } : {}}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium border transition-colors ${mode === m ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-              {m === 'text' ? 'Texte' : 'Fichier'}
+              {l}
             </button>
           ))}
         </div>
@@ -106,8 +110,56 @@ export default function HashPage() {
           )}
         </div>
 
+        {/* Verify mode */}
+        {mode === 'verify' && (
+          <div className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-5 space-y-4">
+            <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">Vérifiez si un texte correspond à un hash donné.</p>
+            <div>
+              <label className="block text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wider mb-1.5">Texte original</label>
+              <textarea rows={3} value={verifyText} onChange={e => { setVerifyText(e.target.value); setVerifyResult(null); }}
+                className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-[#fafafa] dark:bg-[#0a0a0a] text-sm font-mono text-[#171717] dark:text-[#ededed] focus:outline-none resize-none" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wider mb-1.5">Hash à vérifier</label>
+              <input type="text" value={verifyHash} onChange={e => { setVerifyHash(e.target.value); setVerifyResult(null); }}
+                placeholder="Collez le hash ici…"
+                className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-[#fafafa] dark:bg-[#0a0a0a] text-sm font-mono text-[#171717] dark:text-[#ededed] focus:outline-none" />
+            </div>
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wider mb-1.5">Algorithme</label>
+                <select value={verifyAlgo} onChange={e => setVerifyAlgo(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-[#fafafa] dark:bg-[#0a0a0a] text-sm text-[#171717] dark:text-[#ededed]">
+                  {ALGOS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
+                </select>
+              </div>
+              <button onClick={() => {
+                const computed = computeHash(verifyText, verifyAlgo);
+                setVerifyResult(computed.toLowerCase() === verifyHash.trim().toLowerCase());
+              }} disabled={!verifyText || !verifyHash}
+                style={{ backgroundColor: ACCENT }}
+                className="px-5 py-2 text-white text-sm font-semibold rounded-xl hover:opacity-90 disabled:opacity-40">
+                Vérifier
+              </button>
+            </div>
+            {verifyResult !== null && (
+              <div className={`flex items-center gap-3 rounded-xl p-4 ${verifyResult ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800'}`}>
+                {verifyResult
+                  ? <ShieldCheck className="w-6 h-6 text-emerald-500 shrink-0" />
+                  : <ShieldX className="w-6 h-6 text-red-500 shrink-0" />}
+                <div>
+                  <p className={`text-sm font-semibold ${verifyResult ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
+                    {verifyResult ? 'Hash valide — le texte correspond !' : 'Hash invalide — le texte ne correspond pas.'}
+                  </p>
+                  <p className="text-xs text-[#737373] dark:text-[#a3a3a3] mt-0.5 font-mono">{computeHash(verifyText, verifyAlgo)}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Results */}
-        <div className="space-y-3">
+        {mode !== 'verify' && <div className="space-y-3">
           {hashes.map(h => (
             <div key={h.id} className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-4">
               <div className="flex items-center justify-between mb-2">
@@ -130,6 +182,8 @@ export default function HashPage() {
             </div>
           ))}
         </div>
+
+        }
 
         {/* Info */}
         <div className="grid sm:grid-cols-3 gap-3 text-xs text-[#737373] dark:text-[#a3a3a3]">

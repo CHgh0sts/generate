@@ -32,6 +32,16 @@ const routes = [
   { path: '/units',      priority: 0.8,  changeFrequency: 'monthly' },
   { path: '/pwa',        priority: 0.8,  changeFrequency: 'monthly' },
   { path: '/audit',      priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/currency',   priority: 0.85, changeFrequency: 'daily' },
+  { path: '/html-encode',priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/faker',      priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/robots',     priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/bytes',      priority: 0.75, changeFrequency: 'monthly' },
+  { path: '/ocr',        priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/palette',    priority: 0.8,  changeFrequency: 'monthly' },
+  { path: '/sql',        priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/ssl',        priority: 0.85, changeFrequency: 'monthly' },
+  { path: '/img-diff',   priority: 0.8,  changeFrequency: 'monthly' },
 ];
 
 export default function sitemap() {

@@ -2,7 +2,8 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Check, X } from 'lucide-react';
+import { Check, X, Download } from 'lucide-react';
+import { useToast } from '../Toast';
 
 const ACCENT = '#16a34a';
 
@@ -18,10 +19,24 @@ function syntaxHighlight(json) {
     });
 }
 
+function jsonToCsv(data) {
+  const arr = Array.isArray(data) ? data : [data];
+  if (!arr.length || typeof arr[0] !== 'object') throw new Error('Le JSON doit être un tableau d\'objets');
+  const keys = [...new Set(arr.flatMap(Object.keys))];
+  const rows = arr.map(r => keys.map(k => {
+    const v = r[k];
+    if (v === null || v === undefined) return '';
+    const str = typeof v === 'object' ? JSON.stringify(v) : String(v);
+    return str.includes(',') || str.includes('"') || str.includes('\n') ? `"${str.replace(/"/g,'""')}"` : str;
+  }).join(','));
+  return [keys.join(','), ...rows].join('\n');
+}
+
 export default function JsonPage() {
   const [input, setInput]   = useState('');
   const [indent, setIndent] = useState(2);
   const [copied, setCopied] = useState('');
+  const pushToast = useToast();
 
   const copy = (t, id='main') => navigator.clipboard.writeText(t).then(() => { setCopied(id); setTimeout(() => setCopied(''), 1500); });
 
@@ -142,9 +157,23 @@ export default function JsonPage() {
             <div className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2 border-b border-[#f5f5f5] dark:border-[#1a1a1a]">
                 <span className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3]">Minifié</span>
-                <button onClick={() => minified && copy(minified, 'min')} style={copied==='min'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-2 py-1 text-white text-[10px] font-semibold rounded-md">
-                  {copied==='min'?<Check className="inline w-3 h-3" />:'Copier'}
-                </button>
+                <div className="flex gap-2">
+                  {parsed.ok && parsed.data && (
+                    <button onClick={() => {
+                      try {
+                        const csv = jsonToCsv(parsed.data);
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'export.csv'; a.click();
+                        pushToast?.('CSV exporté !');
+                      } catch(e) { pushToast?.(e.message, 'error'); }
+                    }} className="flex items-center gap-1 px-2 py-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded-md text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
+                      <Download className="w-3 h-3" /> CSV
+                    </button>
+                  )}
+                  <button onClick={() => minified && copy(minified, 'min')} style={copied==='min'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-2 py-1 text-white text-[10px] font-semibold rounded-md">
+                    {copied==='min'?<Check className="inline w-3 h-3" />:'Copier'}
+                  </button>
+                </div>
               </div>
               <div className="p-3 max-h-24 overflow-auto">
                 <code className="text-xs font-mono text-[#525252] dark:text-[#a3a3a3] break-all">{minified || <span className="italic text-[#a3a3a3]">—</span>}</code>

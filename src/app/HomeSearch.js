@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, X, Clock, ChevronRight } from 'lucide-react';
-import { ToolCard } from './ToolCard';
+import { Search, X, Clock, Heart } from 'lucide-react';
+import { ToolCard, getFavorites } from './ToolCard';
 
 const RECENT_KEY = 'generate_recent_tools';
 const MAX_RECENT = 4;
@@ -15,12 +15,19 @@ export function HomeSearch({ groups }) {
   const [query, setQuery]       = useState('');
   const [category, setCategory] = useState(''); // '' = all
   const [recent, setRecent]     = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const inputRef = useRef(null);
 
   const totalTools = groups.reduce((s, g) => s + g.tools.length, 0);
 
-  // Load recent from localStorage
-  useEffect(() => { setRecent(getRecent()); }, []);
+  // Load recent + favorites from localStorage
+  useEffect(() => {
+    setRecent(getRecent());
+    setFavorites(getFavorites());
+    const handler = () => setFavorites(getFavorites());
+    window.addEventListener('favorites-changed', handler);
+    return () => window.removeEventListener('favorites-changed', handler);
+  }, []);
 
   // Keyboard shortcut: "/" to focus search, Esc to clear
   useEffect(() => {
@@ -48,6 +55,10 @@ export function HomeSearch({ groups }) {
   const recentTools = useMemo(() =>
     recent.map(href => allTools.find(t => t.href === href)).filter(Boolean),
   [recent, allTools]);
+
+  const favoriteTools = useMemo(() =>
+    favorites.map(href => allTools.find(t => t.href === href)).filter(Boolean),
+  [favorites, allTools]);
 
   const filtered = useMemo(() => {
     if (!q && !category) return null;
@@ -133,6 +144,21 @@ export function HomeSearch({ groups }) {
         )
       ) : (
         <div className="space-y-8">
+          {/* Favorites */}
+          {favoriteTools.length > 0 && (
+            <section aria-label="Favoris">
+              <div className="flex items-center gap-2 mb-3">
+                <Heart className="w-3.5 h-3.5 text-red-400 fill-current" />
+                <h3 className="text-xs font-medium uppercase tracking-[0.12em] text-[#a3a3a3] dark:text-[#737373]">Favoris</h3>
+              </div>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {favoriteTools.map(tool => (
+                  <li key={tool.href}><ToolCard {...tool} /></li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {/* Recently used */}
           {recentTools.length > 0 && (
             <section aria-label="Récemment utilisés">

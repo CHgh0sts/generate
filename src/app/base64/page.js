@@ -198,6 +198,22 @@ export default function Base64Page() {
                     </button>
                   </div>
                   <div className="p-4">
+                    {direction === 'decode' && output && (() => {
+                      const dataUri = `data:image/png;base64,${input.trim()}`;
+                      const isImg = /^data:image\//i.test(input.trim()) || /^\/9j\/|^iVBOR/i.test(input.trim());
+                      return isImg ? (
+                        <div className="mb-3">
+                          <p className="text-[10px] text-[#a3a3a3] mb-1.5">Aperçu image</p>
+                          <img src={/^data:/.test(input.trim()) ? input.trim() : dataUri} alt="preview" className="max-w-full max-h-48 rounded-lg border border-[#e5e5e5] dark:border-[#262626] object-contain" />
+                        </div>
+                      ) : null;
+                    })()}
+                    {direction === 'encode' && /^data:image\//i.test(output) && (
+                      <div className="mb-3">
+                        <p className="text-[10px] text-[#a3a3a3] mb-1.5">Aperçu image</p>
+                        <img src={output} alt="preview" className="max-w-full max-h-48 rounded-lg border border-[#e5e5e5] dark:border-[#262626] object-contain" />
+                      </div>
+                    )}
                     <p className="text-sm font-mono text-[#171717] dark:text-[#ededed] break-all leading-relaxed">{output}</p>
                     <p className="text-[10px] text-[#a3a3a3] mt-2">{output.length} caractère{output.length !== 1 ? 's' : ''}</p>
                   </div>

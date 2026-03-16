@@ -29,7 +29,9 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sharp": "^0.34.3",
-    "svgo": "^4.0.1"
+    "sql-formatter": "^15.7.2",
+    "svgo": "^4.0.1",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
