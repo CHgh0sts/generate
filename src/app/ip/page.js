@@ -191,7 +191,7 @@ export default function IpPage() {
                       width="100%"
                       height="200"
                       loading="lazy"
-                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${result.longitude - 0.05},${result.latitude - 0.05},${result.longitude + 0.05},${result.latitude + 0.05}&layer=mapnik&marker=${result.latitude},${result.longitude}`}
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${result.longitude - 0.015},${result.latitude - 0.015},${result.longitude + 0.015},${result.latitude + 0.015}&layer=mapnik&marker=${result.latitude},${result.longitude}`}
                       className="block w-full"
                       style={{ border: 0 }}
                     />
