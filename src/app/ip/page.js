@@ -173,7 +173,7 @@ export default function IpPage() {
               </div>
               <div className="p-4">
                 <div className="flex items-start gap-3 mb-3">
-                  {result.flag?.emoji && <span className="text-3xl">{result.flag.emoji}</span>}
+                  {result.flag?.emoji && <span className="text-4xl">{result.flag.emoji}</span>}
                   <div className="flex-1 min-w-0">
                     <Row icon={MapPin} label="Pays" value={result.country && result.country_code ? `${result.country} (${result.country_code})` : result.country} color={ACCENT} />
                     <Row icon={MapPin} label="Région" value={result.region} color={ACCENT} />
