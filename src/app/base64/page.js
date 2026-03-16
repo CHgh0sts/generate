@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, ArrowRight } from 'lucide-react';
 
 const ACCENT = '#f59e0b';
 
@@ -144,7 +145,7 @@ export default function Base64Page() {
             <>
               <div className="flex items-center gap-2">
                 <div className={`flex-1 text-center text-xs font-medium py-1.5 rounded-md ${direction === 'encode' ? 'text-[#171717] dark:text-[#ededed]' : 'text-[#737373] dark:text-[#a3a3a3]'}`}>
-                  {direction === 'encode' ? 'Texte → Base64' : 'Base64 → Texte'}
+                  {direction === 'encode' ? <span className="flex items-center gap-1">Texte <ArrowRight className="w-3 h-3" /> Base64</span> : <span className="flex items-center gap-1">Base64 <ArrowRight className="w-3 h-3" /> Texte</span>}
                 </div>
                 <button
                   onClick={swapDirection}
@@ -193,7 +194,7 @@ export default function Base64Page() {
                   <div className="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#262626] flex items-center justify-between">
                     <p className="text-sm font-medium text-[#171717] dark:text-[#ededed]">Résultat</p>
                     <button onClick={() => copy(output)} className="text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] transition-colors">
-                      {copied ? '✓ Copié' : 'Copier'}
+                      {copied ? <><Check className="inline w-3 h-3 mr-0.5" />Copié</> : 'Copier'}
                     </button>
                   </div>
                   <div className="p-4">
@@ -215,7 +216,7 @@ export default function Base64Page() {
                     style={direction === d ? { backgroundColor: ACCENT } : {}}
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${direction === d ? 'text-white' : 'text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed]'}`}
                   >
-                    {d === 'encode' ? 'Fichier → Base64' : 'Base64 → Fichier'}
+                    {d === 'encode' ? <span className="flex items-center gap-1">Fichier <ArrowRight className="w-3 h-3" /> Base64</span> : <span className="flex items-center gap-1">Base64 <ArrowRight className="w-3 h-3" /> Fichier</span>}
                   </button>
                 ))}
               </div>
@@ -250,8 +251,8 @@ export default function Base64Page() {
                     <div className="rounded-xl border border-[#e5e5e5] dark:border-[#262626] bg-white dark:bg-[#171717] overflow-hidden">
                       <div className="px-4 py-3 border-b border-[#e5e5e5] dark:border-[#262626] flex items-center justify-between">
                         <p className="text-sm font-medium text-[#171717] dark:text-[#ededed]">Data URI encodé</p>
-                        <button onClick={() => copy(fileOutput)} className="text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] transition-colors">
-                          {copied ? '✓ Copié' : 'Copier'}
+                        <button onClick={() => copy(fileOutput)} className="flex items-center gap-1 text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] transition-colors">
+                          {copied ? <><Check className="w-3 h-3" />Copié</> : 'Copier'}
                         </button>
                       </div>
                       <div className="p-4">

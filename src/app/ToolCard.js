@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 export function ToolCard({ href, color, title, description }) {
   return (
@@ -16,8 +17,8 @@ export function ToolCard({ href, color, title, description }) {
         <h4 className="text-sm font-medium text-[#171717] dark:text-[#ededed]">{title}</h4>
       </div>
       <p className="text-xs text-[#737373] dark:text-[#a3a3a3] flex-1 leading-relaxed pl-4">{description}</p>
-      <span className="mt-3 pl-4 inline-flex items-center text-xs font-medium" style={{ color }}>
-        Ouvrir <span className="ml-1 text-[10px]">→</span>
+      <span className="mt-3 pl-4 inline-flex items-center gap-1 text-xs font-medium" style={{ color }}>
+        Ouvrir <ArrowRight className="w-3 h-3" />
       </span>
     </Link>
   );

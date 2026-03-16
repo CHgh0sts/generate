@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { RotateCw } from 'lucide-react';
 import { Modal } from '../Modal';
 
 const ACCENT = '#059669';
@@ -341,7 +342,7 @@ export default function ResizePage() {
                   <button key={deg} onClick={() => setRotate(deg)}
                     style={rotate === deg ? { backgroundColor: ACCENT } : {}}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${rotate === deg ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-                    {deg === 0 ? 'Normal' : `↻ ${deg}°`}
+                    {deg === 0 ? 'Normal' : <span className="flex items-center gap-1"><RotateCw className="w-3 h-3" />{deg}°</span>}
                   </button>
                 ))}
                 <div className="h-px w-px self-stretch" />

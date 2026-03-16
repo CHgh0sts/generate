@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { ChevronRight } from 'lucide-react';
 
 const defaultParams = {
   value: 'Hello World',
@@ -178,7 +179,7 @@ export default function GeneratePage() {
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="flex items-center gap-2 text-sm text-[#737373] dark:text-[#a3a3a3] hover:text-[#404040] dark:hover:text-[#ededed] transition-colors"
               >
-                <span className={`transition-transform ${showAdvanced ? 'rotate-90' : ''}`}>▶</span>
+                <ChevronRight className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} />
                 Options avancées
               </button>
 

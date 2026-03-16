@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, X } from 'lucide-react';
 
 const ACCENT = '#e11d48';
 
@@ -155,7 +156,7 @@ export default function ColorsPage() {
                     <code className="text-sm font-mono text-[#171717] dark:text-[#ededed]">{value}</code>
                   </div>
                   <button onClick={() => copy(value, id)} style={copied===id?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-2 py-1 text-white text-[10px] font-semibold rounded-md shrink-0">
-                    {copied===id?'✓':'Copier'}
+                    {copied===id?<Check className="w-3 h-3" />:'Copier'}
                   </button>
                 </div>
               ))}
@@ -177,7 +178,7 @@ export default function ColorsPage() {
                   <div className="h-14 rounded-lg border border-black/5" style={{ backgroundColor: h }} title={h} />
                   <p className="text-center text-[10px] text-[#737373] dark:text-[#a3a3a3]">{label}</p>
                   <p className="text-center text-[9px] font-mono text-[#a3a3a3]">{h}</p>
-                  {copied===`p${label}` && <p className="text-center text-[9px] text-emerald-500">✓</p>}
+                  {copied===`p${label}` && <p className="text-center text-[9px] text-emerald-500 flex justify-center"><Check className="w-3 h-3" /></p>}
                 </div>
               ))}
             </div>
@@ -185,7 +186,7 @@ export default function ColorsPage() {
               <p className="text-xs font-medium text-[#737373] dark:text-[#a3a3a3] mb-2">Export CSS</p>
               <pre className="text-xs font-mono text-[#525252] dark:text-[#a3a3a3] overflow-x-auto">{`:root {\n${palette.map(({label,hex:h})=>`  --color-${label}: ${h};`).join('\n')}\n}`}</pre>
               <button onClick={() => copy(`:root {\n${palette.map(({label,hex:h})=>`  --color-${label}: ${h};`).join('\n')}\n}`, 'css')} style={copied==='css'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="mt-2 px-3 py-1.5 text-white text-xs font-semibold rounded-lg">
-                {copied==='css'?'✓ Copié':'Copier CSS'}
+                {copied==='css'?<><Check className="inline w-3 h-3 mr-0.5" />Copié</>:'Copier CSS'}
               </button>
             </div>
           </div>
@@ -208,7 +209,7 @@ export default function ColorsPage() {
                 <div key={i} className="flex-1 cursor-pointer" onClick={() => copy(h, `harm${i}`)}>
                   <div className="h-32 rounded-xl border border-black/5 shadow-sm mb-2" style={{ backgroundColor: h }} />
                   <p className="text-center text-xs font-mono text-[#171717] dark:text-[#ededed]">{h.toUpperCase()}</p>
-                  <p className="text-center text-[10px] text-[#a3a3a3]">{copied===`harm${i}`?'✓ Copié':'Cliquer pour copier'}</p>
+                  <p className="text-center text-[10px] text-[#a3a3a3] flex justify-center items-center gap-0.5">{copied===`harm${i}`?<><Check className="w-3 h-3 text-emerald-500" />Copié</>:'Cliquer pour copier'}</p>
                 </div>
               ))}
             </div>
@@ -243,7 +244,7 @@ export default function ColorsPage() {
                   {gColors.map((c, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <input type="color" value={c} onChange={e => setGColors(gColors.map((x,j)=>j===i?e.target.value:x))} className="w-8 h-8 rounded border-0 p-0 cursor-pointer" />
-                      <button onClick={() => setGColors(gColors.filter((_,j)=>j!==i))} className="text-[#a3a3a3] hover:text-red-500 text-xs">✕</button>
+                      <button onClick={() => setGColors(gColors.filter((_,j)=>j!==i))} className="text-[#a3a3a3] hover:text-red-500"><X className="w-3 h-3" /></button>
                     </div>
                   ))}
                   <button onClick={() => setGColors([...gColors,'#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')])} style={{color:ACCENT}} className="text-xs font-semibold px-2 py-1 border border-dashed border-current rounded-lg">+ Couleur</button>
@@ -252,7 +253,7 @@ export default function ColorsPage() {
               <div className="bg-[#0a0a0a] rounded-lg p-4 relative">
                 <code className="text-xs font-mono text-[#ededed] break-all">{`background: ${gradientCSS};`}</code>
                 <button onClick={() => copy(`background: ${gradientCSS};`, 'grad')} style={copied==='grad'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="absolute top-3 right-3 px-2 py-1 text-white text-[10px] font-semibold rounded">
-                  {copied==='grad'?'✓':'Copier'}
+                  {copied==='grad'?<Check className="w-3 h-3" />:'Copier'}
                 </button>
               </div>
             </div>

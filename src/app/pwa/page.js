@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, ArrowRight } from 'lucide-react';
 
 const ACCENT = '#0d9488';
 
@@ -583,7 +584,7 @@ export default function PwaPage() {
                     }`}
                   >
                     <span className="font-medium text-xs">{fw.label}</span>
-                    <span className="block text-[10px] text-[#a3a3a3] mt-0.5">→ integration.{fw.ext}</span>
+                    <span className="flex items-center gap-0.5 text-[10px] text-[#a3a3a3] mt-0.5"><ArrowRight className="w-2.5 h-2.5" /> integration.{fw.ext}</span>
                   </button>
                 ))}
               </div>
@@ -595,7 +596,7 @@ export default function PwaPage() {
             )}
             {success && (
               <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm">
-                ✓ ZIP généré et téléchargé — 27 icônes + manifest + service worker + code d&apos;intégration.
+                <span className="flex items-center gap-1"><Check className="w-4 h-4" /> ZIP généré et téléchargé — 27 icônes + manifest + service worker + code d&apos;intégration.</span>
               </div>
             )}
 
@@ -631,7 +632,7 @@ export default function PwaPage() {
                 {[
                   ['icons/favicon-16x16.png', 'icons/favicon-32x32.png', 'icons/favicon-48x48.png'],
                   ['icons/apple-touch-icon.png', 'icons/apple-touch-icon-*.png', '(10 tailles Apple)'],
-                  ['icons/icon-{72→512}.png', '(8 tailles Android)', 'icons/icon-maskable-{192,512}.png'],
+                  ['icons/icon-{72-512}.png', '(8 tailles Android)', 'icons/icon-maskable-{192,512}.png'],
                   ['manifest.webmanifest', 'browserconfig.xml', 'sw.js'],
                   ['offline.html', `integration.${FRAMEWORKS.find(f => f.value === info.framework)?.ext || 'html'}`, 'README.md'],
                 ].flat().map((item) => (
@@ -780,7 +781,7 @@ export default function PwaPage() {
                     onClick={copyCode}
                     className="text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] transition-colors"
                   >
-                    {copied ? '✓ Copié' : 'Copier'}
+                    {copied ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Copié</span> : 'Copier'}
                   </button>
                 </div>
                 <pre className="p-4 text-[10px] font-mono text-[#525252] dark:text-[#a3a3a3] overflow-auto max-h-96 leading-relaxed whitespace-pre-wrap">{codePreview}</pre>
@@ -803,7 +804,7 @@ export default function PwaPage() {
                     <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${ok ? 'text-white' : 'border border-[#e5e5e5] dark:border-[#404040] text-[#a3a3a3]'}`}
                       style={ok ? { backgroundColor: ACCENT } : {}}
                     >
-                      {ok ? '✓' : ''}
+                      {ok ? <Check className="w-2.5 h-2.5" /> : null}
                     </span>
                     <span className={ok ? 'text-[#171717] dark:text-[#ededed]' : 'text-[#a3a3a3]'}>{label}</span>
                   </li>

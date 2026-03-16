@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { ArrowRight } from 'lucide-react';
 import { Modal } from '../Modal';
 
 const ACCENT = '#ec4899';
@@ -186,10 +187,10 @@ export default function ConvertAudioPage() {
             <div className="rounded-xl border border-[#e5e5e5] dark:border-[#262626] bg-white dark:bg-[#171717] p-5">
               <p className="text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-3">À savoir</p>
               <ul className="space-y-2 text-xs text-[#525252] dark:text-[#a3a3a3]">
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> Fonctionne aussi avec des vidéos (extraction audio)</li>
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> FLAC et WAV : sans perte de qualité</li>
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> MP3 : meilleure compatibilité universelle</li>
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> La conversion se fait côté serveur via ffmpeg</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> Fonctionne aussi avec des vidéos (extraction audio)</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> FLAC et WAV : sans perte de qualité</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> MP3 : meilleure compatibilité universelle</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> La conversion se fait côté serveur via ffmpeg</li>
               </ul>
             </div>
             {result && (

@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, ArrowUp, ArrowDown, X, Download } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 
 const ACCENT = '#dc2626';
@@ -138,9 +139,9 @@ export default function PdfPage() {
                     <svg className="w-4 h-4 text-[#a3a3a3] shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" /></svg>
                     <span className="flex-1 text-sm text-[#171717] dark:text-[#ededed] truncate">{f.name}</span>
                     <span className="text-xs text-[#a3a3a3]">{fmtSize(f.size)}</span>
-                    <button onClick={() => moveUp(i)} className="text-[#a3a3a3] hover:text-[#525252] text-xs px-1">↑</button>
-                    <button onClick={() => moveDown(i)} className="text-[#a3a3a3] hover:text-[#525252] text-xs px-1">↓</button>
-                    <button onClick={() => removeFile(i)} className="text-[#a3a3a3] hover:text-red-500 text-xs px-1">✕</button>
+                    <button onClick={() => moveUp(i)} className="text-[#a3a3a3] hover:text-[#525252] px-1"><ArrowUp className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => moveDown(i)} className="text-[#a3a3a3] hover:text-[#525252] px-1"><ArrowDown className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => removeFile(i)} className="text-[#a3a3a3] hover:text-red-500 px-1"><X className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
               </div>
@@ -185,7 +186,7 @@ export default function PdfPage() {
           <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                <span className="text-emerald-600 font-bold">✓</span>
+                <Check className="w-4 h-4 text-emerald-600" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">PDF prêt</p>
@@ -194,7 +195,7 @@ export default function PdfPage() {
             </div>
             <button onClick={() => download(result.bytes, result.name)} style={{ backgroundColor: ACCENT }}
               className="w-full py-2.5 text-white font-semibold rounded-lg text-sm hover:opacity-90">
-              ↓ Télécharger {result.name}
+              <Download className="inline w-4 h-4 mr-1" /> Télécharger {result.name}
             </button>
           </div>
         )}

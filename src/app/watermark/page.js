@@ -2,19 +2,32 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, Download, ArrowUpLeft, ArrowUp, ArrowUpRight, ArrowLeft, Move, ArrowRight, ArrowDownLeft, ArrowDown, ArrowDownRight } from 'lucide-react';
 
 const ACCENT = '#7c3aed';
 
+const POSITION_ICONS = {
+  'top-left':     <ArrowUpLeft className="w-3.5 h-3.5" />,
+  'top-center':   <ArrowUp className="w-3.5 h-3.5" />,
+  'top-right':    <ArrowUpRight className="w-3.5 h-3.5" />,
+  'middle-left':  <ArrowLeft className="w-3.5 h-3.5" />,
+  'center':       <Move className="w-3.5 h-3.5" />,
+  'middle-right': <ArrowRight className="w-3.5 h-3.5" />,
+  'bottom-left':  <ArrowDownLeft className="w-3.5 h-3.5" />,
+  'bottom-center':<ArrowDown className="w-3.5 h-3.5" />,
+  'bottom-right': <ArrowDownRight className="w-3.5 h-3.5" />,
+};
+
 const POSITIONS = [
-  { id: 'top-left',     label: '↖' },
-  { id: 'top-center',   label: '↑' },
-  { id: 'top-right',    label: '↗' },
-  { id: 'middle-left',  label: '←' },
-  { id: 'center',       label: '·' },
-  { id: 'middle-right', label: '→' },
-  { id: 'bottom-left',  label: '↙' },
-  { id: 'bottom-center',label: '↓' },
-  { id: 'bottom-right', label: '↘' },
+  { id: 'top-left',     label: 'top-left' },
+  { id: 'top-center',   label: 'top-center' },
+  { id: 'top-right',    label: 'top-right' },
+  { id: 'middle-left',  label: 'middle-left' },
+  { id: 'center',       label: 'center' },
+  { id: 'middle-right', label: 'middle-right' },
+  { id: 'bottom-left',  label: 'bottom-left' },
+  { id: 'bottom-center',label: 'bottom-center' },
+  { id: 'bottom-right', label: 'bottom-right' },
 ];
 
 function fmtSize(b) {
@@ -132,7 +145,7 @@ export default function WatermarkPage() {
                   <button key={p.id} onClick={() => setPosition(p.id)}
                     style={position === p.id && !repeat ? { backgroundColor: ACCENT } : {}}
                     className={`w-10 h-10 rounded-lg text-base border transition-colors ${position === p.id && !repeat ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-                    {p.label}
+                    {POSITION_ICONS[p.id]}
                   </button>
                 ))}
               </div>
@@ -179,7 +192,7 @@ export default function WatermarkPage() {
               <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5f5f5] dark:border-[#1a1a1a]">
                 <p className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider">{result ? 'Résultat' : 'Aperçu source'}</p>
                 {result && (
-                  <button onClick={download} style={{ backgroundColor: ACCENT }} className="px-3 py-1.5 text-white text-xs font-semibold rounded-lg">↓ Télécharger</button>
+                  <button onClick={download} style={{ backgroundColor: ACCENT }} className="flex items-center gap-1 px-3 py-1.5 text-white text-xs font-semibold rounded-lg"><Download className="w-3 h-3" /> Télécharger</button>
                 )}
               </div>
               <div className="p-4 flex items-center justify-center min-h-64 bg-[#fafafa] dark:bg-[#0a0a0a]">
@@ -198,7 +211,7 @@ export default function WatermarkPage() {
               </div>
               {result && (
                 <div className="px-4 py-3 border-t border-[#f5f5f5] dark:border-[#1a1a1a] flex items-center gap-2 text-xs text-[#737373] dark:text-[#a3a3a3]">
-                  <span className="text-emerald-500">✓</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
                   <span>{result.name} · {fmtSize(result.size)}</span>
                   <button onClick={() => setResult(null)} className="ml-auto text-[#a3a3a3] hover:text-[#737373]">Recommencer</button>
                 </div>

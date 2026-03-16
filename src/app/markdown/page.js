@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, Download, Pencil, Columns2, Eye } from 'lucide-react';
 import { marked } from 'marked';
 
 const ACCENT = '#0369a1';
@@ -103,18 +104,18 @@ export default function MarkdownPage() {
           <div className="flex items-center gap-2 shrink-0">
             {/* View toggle */}
             <div className="flex gap-1 border border-[#e5e5e5] dark:border-[#262626] rounded-lg p-0.5">
-              {[{id:'editor',label:'✎ Éditer'},{id:'split',label:'⊞ Split'},{id:'preview',label:'◉ Aperçu'}].map(v => (
+              {[{id:'editor',icon:<Pencil className="w-3 h-3" />,label:'Éditer'},{id:'split',icon:<Columns2 className="w-3 h-3" />,label:'Split'},{id:'preview',icon:<Eye className="w-3 h-3" />,label:'Aperçu'}].map(v => (
                 <button key={v.id} onClick={() => setView(v.id)}
                   style={view===v.id?{backgroundColor:ACCENT}:{}}
                   className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${view===v.id?'text-white':'text-[#737373] dark:text-[#a3a3a3]'}`}>
-                  {v.label}
+                  <span className="flex items-center gap-1">{v.icon}{v.label}</span>
                 </button>
               ))}
             </div>
             {/* Actions */}
-            <button onClick={() => copy(md, 'md')} style={copied==='md'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-3 py-1.5 text-white text-xs font-semibold rounded-lg">{copied==='md'?'✓ Copié':'Copier MD'}</button>
-            <button onClick={() => download(md,'document.md','text/markdown')} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]">↓ .md</button>
-            <button onClick={() => download(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Document</title><style>body{max-width:800px;margin:0 auto;padding:2rem;font-family:system-ui;line-height:1.6}pre{background:#f5f5f5;padding:1rem;border-radius:6px;overflow:auto}code{background:#f5f5f5;padding:2px 4px;border-radius:3px}blockquote{border-left:4px solid #e5e5e5;margin:0;padding-left:1rem;color:#737373}table{border-collapse:collapse}td,th{border:1px solid #e5e5e5;padding:.5rem 1rem}</style></head><body>${html}</body></html>`, 'document.html','text/html')} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]">↓ HTML</button>
+            <button onClick={() => copy(md, 'md')} style={copied==='md'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="flex items-center gap-1 px-3 py-1.5 text-white text-xs font-semibold rounded-lg">{copied==='md'?<><Check className="w-3 h-3" />Copié</>:'Copier MD'}</button>
+            <button onClick={() => download(md,'document.md','text/markdown')} className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]"><Download className="w-3 h-3" /> .md</button>
+            <button onClick={() => download(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Document</title><style>body{max-width:800px;margin:0 auto;padding:2rem;font-family:system-ui;line-height:1.6}pre{background:#f5f5f5;padding:1rem;border-radius:6px;overflow:auto}code{background:#f5f5f5;padding:2px 4px;border-radius:3px}blockquote{border-left:4px solid #e5e5e5;margin:0;padding-left:1rem;color:#737373}table{border-collapse:collapse}td,th{border:1px solid #e5e5e5;padding:.5rem 1rem}</style></head><body>${html}</body></html>`, 'document.html','text/html')} className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]"><Download className="w-3 h-3" /> HTML</button>
             <ThemeToggle />
           </div>
         </div>

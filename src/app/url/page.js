@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, X, XCircle, ArrowRight } from 'lucide-react';
 
 const ACCENT = '#06b6d4';
 
@@ -25,7 +26,7 @@ export default function UrlPage() {
   };
 
   const encoded = tab === 'encode' ? encodeURIComponent(input) : '';
-  const decoded = tab === 'decode' ? (() => { try { return decodeURIComponent(input); } catch { return '❌ URL invalide'; } })() : '';
+  const decoded = tab === 'decode' ? (() => { try { return decodeURIComponent(input); } catch { return 'URL invalide'; } })() : '';
   const parsed  = tab === 'parse'  ? parseUrl(input) : null;
 
   const builtUrl = (() => {
@@ -91,8 +92,8 @@ export default function UrlPage() {
                   {tab === 'encode' ? 'URL encodée' : 'URL décodée'}
                 </label>
                 <button onClick={() => copy(tab === 'encode' ? encoded : decoded)} style={copied === 'main' ? { backgroundColor: '#10b981' } : { backgroundColor: ACCENT }}
-                  className="px-2.5 py-1 text-white text-[10px] font-semibold rounded-md">
-                  {copied === 'main' ? '✓ Copié' : 'Copier'}
+                  className="flex items-center gap-1 px-2.5 py-1 text-white text-[10px] font-semibold rounded-md">
+                  {copied === 'main' ? <><Check className="w-3 h-3" />Copié</> : 'Copier'}
                 </button>
               </div>
               <textarea rows={8} readOnly value={tab === 'encode' ? encoded : decoded}
@@ -138,7 +139,7 @@ export default function UrlPage() {
                 )}
               </div>
             ) : input ? (
-              <p className="text-sm text-red-500">❌ URL invalide</p>
+              <p className="text-sm text-red-500 flex items-center gap-1"><XCircle className="w-4 h-4" /> URL invalide</p>
             ) : null}
           </div>
         )}
@@ -172,7 +173,7 @@ export default function UrlPage() {
                   <div key={i} className="flex gap-2">
                     <input placeholder="clé" value={p.k} onChange={e => setParams(params.map((x, j) => j === i ? { ...x, k: e.target.value } : x))} className="flex-1 px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-sm bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] font-mono focus:outline-none" />
                     <input placeholder="valeur" value={p.v} onChange={e => setParams(params.map((x, j) => j === i ? { ...x, v: e.target.value } : x))} className="flex-1 px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-sm bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] font-mono focus:outline-none" />
-                    <button onClick={() => setParams(params.filter((_, j) => j !== i))} className="text-[#a3a3a3] hover:text-red-500 px-2">✕</button>
+                    <button onClick={() => setParams(params.filter((_, j) => j !== i))} className="text-[#a3a3a3] hover:text-red-500 px-2"><X className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
               </div>
@@ -185,7 +186,7 @@ export default function UrlPage() {
               <div className="bg-[#fafafa] dark:bg-[#0a0a0a] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-4">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3]">URL générée</p>
-                  <button onClick={() => copy(builtUrl)} style={copied === 'main' ? { backgroundColor: '#10b981' } : { backgroundColor: ACCENT }} className="px-2.5 py-1 text-white text-[10px] font-semibold rounded-md">{copied === 'main' ? '✓ Copié' : 'Copier'}</button>
+                  <button onClick={() => copy(builtUrl)} style={copied === 'main' ? { backgroundColor: '#10b981' } : { backgroundColor: ACCENT }} className="flex items-center gap-1 px-2.5 py-1 text-white text-[10px] font-semibold rounded-md">{copied === 'main' ? <><Check className="w-3 h-3" />Copié</> : 'Copier'}</button>
                 </div>
                 <code className="text-sm font-mono text-[#171717] dark:text-[#ededed] break-all">{builtUrl}</code>
               </div>

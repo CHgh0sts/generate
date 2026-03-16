@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Play, Pause } from 'lucide-react';
 
 const ACCENT = '#f97316';
 
@@ -107,7 +108,7 @@ function VideoPlayer({ src }) {
               }}
               className="text-white hover:text-white/80 text-sm"
             >
-              {isPlaying ? '❚❚' : '▶'}
+              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </button>
 
             <input

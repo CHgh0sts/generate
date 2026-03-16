@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, X } from 'lucide-react';
 
 const ACCENT = '#9333ea';
 
@@ -129,7 +130,7 @@ export default function RegexPage() {
                 ))}
               </div>
               <div className={`px-2.5 py-1 rounded-full text-xs font-semibold ${error ? 'bg-red-100 text-red-600' : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'}`}>
-                {error ? '✕' : `${matches.length} match${matches.length !== 1 ? 's' : ''}`}
+                {error ? <X className="inline w-3 h-3" /> : `${matches.length} match${matches.length !== 1 ? 's' : ''}`}
               </div>
             </div>
             {error && <p className="text-xs text-red-500 mt-1 font-mono">{error}</p>}
@@ -162,7 +163,7 @@ export default function RegexPage() {
             <div className="flex gap-3">
               <input value={replaceWith} onChange={e => setReplaceWith(e.target.value)} placeholder="Texte de remplacement (ex: ***)"
                 className="flex-1 px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-sm font-mono bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none" />
-              <button onClick={() => copy(replaced, 'rep')} style={copied==='rep'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-3 py-2 text-white text-xs font-semibold rounded-lg">{copied==='rep'?'✓ Copié':'Copier'}</button>
+              <button onClick={() => copy(replaced, 'rep')} style={copied==='rep'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="flex items-center gap-1 px-3 py-2 text-white text-xs font-semibold rounded-lg">{copied==='rep'?<><Check className="w-3 h-3" />Copié</>:'Copier'}</button>
             </div>
             <div className="px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg bg-[#fafafa] dark:bg-[#0a0a0a] text-sm font-mono text-[#525252] dark:text-[#a3a3a3] break-all">{replaced}</div>
           </div>

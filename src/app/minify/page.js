@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, Download } from 'lucide-react';
 
 const ACCENT = '#c026d3';
 
@@ -233,11 +234,11 @@ export default function MinifyPage() {
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-[#737373] dark:text-[#a3a3a3]">Résultat</label>
               <div className="flex gap-2">
-                {output && <button onClick={download} className="text-xs text-[#737373] hover:text-[#525252] border border-[#e5e5e5] dark:border-[#262626] px-2 py-1 rounded-lg">↓ Télécharger</button>}
+                {output && <button onClick={download} className="flex items-center gap-1 text-xs text-[#737373] hover:text-[#525252] border border-[#e5e5e5] dark:border-[#262626] px-2 py-1 rounded-lg"><Download className="w-3 h-3" /> Télécharger</button>}
                 <button onClick={() => output && copy(output)} disabled={!output}
                   style={copied ? { backgroundColor: '#10b981' } : { backgroundColor: ACCENT }}
-                  className="px-2.5 py-1 text-white text-xs font-semibold rounded-md disabled:opacity-30">
-                  {copied ? '✓ Copié' : 'Copier'}
+                  className="flex items-center gap-1 px-2.5 py-1 text-white text-xs font-semibold rounded-md disabled:opacity-30">
+                  {copied ? <><Check className="w-3 h-3" /> Copié</> : 'Copier'}
                 </button>
               </div>
             </div>

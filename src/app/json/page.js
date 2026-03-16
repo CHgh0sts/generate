@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, X } from 'lucide-react';
 
 const ACCENT = '#16a34a';
 
@@ -88,7 +89,7 @@ export default function JsonPage() {
                 style={{ '--tw-ring-color': ACCENT }} />
               {parsed.ok !== null && (
                 <div className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold ${parsed.ok ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'}`}>
-                  {parsed.ok ? '✓ Valide' : '✕ Invalide'}
+                  {parsed.ok ? <><Check className="inline w-3 h-3 mr-0.5" />Valide</> : <><X className="inline w-3 h-3 mr-0.5" />Invalide</>}
                 </div>
               )}
             </div>
@@ -126,7 +127,7 @@ export default function JsonPage() {
                   </div>
                 </div>
                 <button onClick={() => formatted && copy(formatted)} style={copied==='main'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-2 py-1 text-white text-[10px] font-semibold rounded-md">
-                  {copied==='main'?'✓ Copié':'Copier'}
+                  {copied==='main'?<><Check className="inline w-3 h-3 mr-0.5" />Copié</>:'Copier'}
                 </button>
               </div>
               <div className="overflow-auto max-h-52 p-3">
@@ -142,7 +143,7 @@ export default function JsonPage() {
               <div className="flex items-center justify-between px-4 py-2 border-b border-[#f5f5f5] dark:border-[#1a1a1a]">
                 <span className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3]">Minifié</span>
                 <button onClick={() => minified && copy(minified, 'min')} style={copied==='min'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-2 py-1 text-white text-[10px] font-semibold rounded-md">
-                  {copied==='min'?'✓':'Copier'}
+                  {copied==='min'?<Check className="inline w-3 h-3" />:'Copier'}
                 </button>
               </div>
               <div className="p-3 max-h-24 overflow-auto">

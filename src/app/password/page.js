@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, ArrowRight } from 'lucide-react';
 import { Modal } from '../Modal';
 
 const ACCENT = '#ef4444';
@@ -254,10 +255,10 @@ export default function PasswordPage() {
             <div className="rounded-xl border border-[#e5e5e5] dark:border-[#262626] bg-white dark:bg-[#171717] p-5">
               <p className="text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider mb-3">Sécurité</p>
               <ul className="space-y-2 text-xs text-[#525252] dark:text-[#a3a3a3]">
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> Génération 100% locale (crypto.getRandomValues)</li>
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> Aucune donnée envoyée au serveur</li>
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> 16+ caractères recommandés</li>
-                <li className="flex gap-2"><span className="text-[#a3a3a3]">→</span> Les passphrases sont mémorisables et très sûres</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> Génération 100% locale (crypto.getRandomValues)</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> Aucune donnée envoyée au serveur</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> 16+ caractères recommandés</li>
+                <li className="flex gap-2"><ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-[#a3a3a3]" /> Les passphrases sont mémorisables et très sûres</li>
               </ul>
             </div>
 
@@ -265,7 +266,7 @@ export default function PasswordPage() {
               <div className="rounded-xl border border-[#e5e5e5] dark:border-[#262626] bg-white dark:bg-[#171717] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-medium text-[#737373] dark:text-[#a3a3a3] uppercase tracking-wider">Dernier résultat</p>
-                  <button onClick={() => setModalOpen(true)} className="text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed]">Voir tout →</button>
+                  <button onClick={() => setModalOpen(true)} className="flex items-center gap-1 text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed]">Voir tout <ArrowRight className="w-3 h-3" /></button>
                 </div>
                 {strength && (
                   <div className="flex items-center gap-2 mb-3">
@@ -300,7 +301,7 @@ export default function PasswordPage() {
           <div className="flex items-center justify-between">
             <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">{passwords.length} résultats</p>
             <button onClick={copyAll} className="text-xs font-medium text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed]">
-              {copied === 'all' ? '✓ Tout copié' : 'Tout copier'}
+              {copied === 'all' ? <><Check className="inline w-3 h-3 mr-0.5" />Tout copié</> : 'Tout copier'}
             </button>
           </div>
           <ul className="rounded-xl border border-[#e5e5e5] dark:border-[#262626] overflow-hidden divide-y divide-[#f5f5f5] dark:divide-[#1a1a1a]">
@@ -310,7 +311,7 @@ export default function PasswordPage() {
                 <code className="text-sm font-mono text-[#171717] dark:text-[#ededed] break-all flex-1">{pwd}</code>
                 <button onClick={() => copyOne(pwd, idx)}
                   className="shrink-0 flex items-center gap-1.5 text-xs text-[#737373] dark:text-[#a3a3a3] hover:text-[#171717] dark:hover:text-[#ededed] opacity-0 group-hover:opacity-100 transition-all px-2 py-1 rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
-                  {copied === idx ? '✓ Copié' : 'Copier'}
+                  {copied === idx ? <><Check className="inline w-3 h-3 mr-0.5" />Copié</> : 'Copier'}
                 </button>
               </li>
             ))}

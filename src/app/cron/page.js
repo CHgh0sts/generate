@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check } from 'lucide-react';
 
 const ACCENT = '#475569';
 
@@ -148,8 +149,8 @@ export default function CronPage() {
             <input value={cron} onChange={e => setCron(e.target.value)}
               className="flex-1 px-4 py-3 border border-[#e5e5e5] dark:border-[#262626] rounded-xl text-lg font-mono bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2"
               style={{ '--tw-ring-color': ACCENT }} />
-            <button onClick={copy} style={copied?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-4 py-3 text-white font-semibold rounded-xl text-sm shrink-0">
-              {copied ? '✓ Copié' : 'Copier'}
+            <button onClick={copy} style={copied?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="flex items-center gap-1.5 px-4 py-3 text-white font-semibold rounded-xl text-sm shrink-0">
+              {copied ? <><Check className="w-4 h-4" /> Copié</> : 'Copier'}
             </button>
           </div>
           {/* Fields legend */}

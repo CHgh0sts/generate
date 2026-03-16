@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check } from 'lucide-react';
 
 const ACCENT = '#f472b6';
 
@@ -125,7 +126,7 @@ export default function TextPage() {
                   Générer
                 </button>
                 <button onClick={() => copy(loremText)} style={copied ? { backgroundColor: '#10b981' } : {}} className={`px-4 py-2 text-sm font-semibold rounded-lg border transition-colors ${copied ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-                  {copied ? '✓ Copié' : 'Copier'}
+                  {copied ? <><Check className="inline w-3 h-3 mr-0.5" />Copié</> : 'Copier'}
                 </button>
               </div>
               <textarea rows={12} readOnly value={loremText} className="w-full px-3 py-2.5 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-sm bg-[#fafafa] dark:bg-[#0a0a0a] text-[#525252] dark:text-[#a3a3a3] resize-none leading-relaxed" />

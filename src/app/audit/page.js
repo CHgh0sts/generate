@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, X, AlertTriangle, Zap, Search, Accessibility, Lock, Image as ImageIcon, ClipboardList, Minus } from 'lucide-react';
 
 const ACCENT = '#0ea5e9';
 
@@ -55,15 +56,15 @@ function ScoreCircle({ label, score, color }) {
 
 function IssueRow({ issue }) {
   const cfg = {
-    ok:    { icon: '✓', cls: 'text-emerald-600 dark:text-emerald-400', bg: '' },
-    warn:  { icon: '⚠', cls: 'text-amber-600 dark:text-amber-400',   bg: '' },
-    error: { icon: '✕', cls: 'text-red-600 dark:text-red-400',        bg: '' },
-    info:  { icon: '·', cls: 'text-[#737373] dark:text-[#a3a3a3]',   bg: '' },
+    ok:    { icon: <Check className="w-3.5 h-3.5" />,          cls: 'text-emerald-600 dark:text-emerald-400' },
+    warn:  { icon: <AlertTriangle className="w-3.5 h-3.5" />,  cls: 'text-amber-600 dark:text-amber-400' },
+    error: { icon: <X className="w-3.5 h-3.5" />,              cls: 'text-red-600 dark:text-red-400' },
+    info:  { icon: <Minus className="w-3.5 h-3.5" />,          cls: 'text-[#737373] dark:text-[#a3a3a3]' },
   };
   const c = cfg[issue.type] || cfg.info;
   return (
     <li className="flex items-start gap-2.5 py-1.5 text-sm border-b border-[#f5f5f5] dark:border-[#1a1a1a] last:border-0">
-      <span className={`shrink-0 font-bold text-xs mt-0.5 w-4 text-center ${c.cls}`}>{c.icon}</span>
+      <span className={`shrink-0 mt-0.5 ${c.cls}`}>{c.icon}</span>
       <span className="text-[#525252] dark:text-[#a3a3a3] text-xs leading-relaxed">{issue.msg}</span>
     </li>
   );
@@ -136,7 +137,7 @@ export default function AuditPage() {
   };
 
   const tabs = [
-    { id: 'todo',      label: '✦ À faire' },
+    { id: 'todo',      label: 'À faire', icon: <ClipboardList className="w-3.5 h-3.5" /> },
     { id: 'overview',  label: 'Vue d\'ensemble' },
     { id: 'perf',      label: 'Performance' },
     { id: 'seo',       label: 'SEO' },
@@ -264,7 +265,7 @@ export default function AuditPage() {
                   }`}
                   style={activeTab === tab.id ? { borderColor: ACCENT, color: ACCENT } : {}}
                 >
-                  {tab.label}
+                  <span className="flex items-center gap-1">{tab.icon}{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -272,10 +273,10 @@ export default function AuditPage() {
             {/* ── À faire ───────────────────── */}
             {activeTab === 'todo' && (() => {
               const CATEGORIES = [
-                { key: 'performance', label: 'Performance',    color: '#f59e0b', icon: '⚡' },
-                { key: 'seo',         label: 'SEO',            color: '#2563eb', icon: '🔍' },
-                { key: 'accessibility', label: 'Accessibilité', color: '#7c3aed', icon: '♿' },
-                { key: 'security',    label: 'Sécurité',       color: '#ef4444', icon: '🔒' },
+                { key: 'performance', label: 'Performance',    color: '#f59e0b', icon: <Zap className="w-3 h-3" /> },
+                { key: 'seo',         label: 'SEO',            color: '#2563eb', icon: <Search className="w-3 h-3" /> },
+                { key: 'accessibility', label: 'Accessibilité', color: '#7c3aed', icon: <Accessibility className="w-3 h-3" /> },
+                { key: 'security',    label: 'Sécurité',       color: '#ef4444', icon: <Lock className="w-3 h-3" /> },
               ];
 
               // Collect all error/warn issues with category tags
@@ -294,10 +295,10 @@ export default function AuditPage() {
               const imgsNoDims = result.images.list.filter(i => !i.hasDimensions).length;
               const imgsNoLazy = result.images.list.filter(i => i.loading !== 'lazy').length;
               const imgsNoNextGen = result.images.list.filter(i => !i.isNextGen).length;
-              if (imgsNoAlt > 0) allTodos.push({ type: 'error', category: 'Images', catColor: '#10b981', catIcon: '🖼', msg: `${imgsNoAlt} image(s) sans attribut alt — requis pour l'accessibilité et le SEO` });
-              if (imgsNoDims > 0) allTodos.push({ type: 'warn', category: 'Images', catColor: '#10b981', catIcon: '🖼', msg: `${imgsNoDims} image(s) sans attributs width/height — provoque un CLS élevé` });
-              if (imgsNoNextGen > 0) allTodos.push({ type: 'warn', category: 'Images', catColor: '#10b981', catIcon: '🖼', msg: `${imgsNoNextGen} image(s) non converties en WebP/AVIF — gain de poids potentiel important` });
-              if (imgsNoLazy > 0) allTodos.push({ type: 'warn', category: 'Images', catColor: '#10b981', catIcon: '🖼', msg: `${imgsNoLazy} image(s) sans lazy loading — ralentit le chargement initial` });
+              if (imgsNoAlt > 0) allTodos.push({ type: 'error', category: 'Images', catColor: '#10b981', catIcon: <ImageIcon className="w-3 h-3" />, msg: `${imgsNoAlt} image(s) sans attribut alt — requis pour l'accessibilité et le SEO` });
+              if (imgsNoDims > 0) allTodos.push({ type: 'warn', category: 'Images', catColor: '#10b981', catIcon: <ImageIcon className="w-3 h-3" />, msg: `${imgsNoDims} image(s) sans attributs width/height — provoque un CLS élevé` });
+              if (imgsNoNextGen > 0) allTodos.push({ type: 'warn', category: 'Images', catColor: '#10b981', catIcon: <ImageIcon className="w-3 h-3" />, msg: `${imgsNoNextGen} image(s) non converties en WebP/AVIF — gain de poids potentiel important` });
+              if (imgsNoLazy > 0) allTodos.push({ type: 'warn', category: 'Images', catColor: '#10b981', catIcon: <ImageIcon className="w-3 h-3" />, msg: `${imgsNoLazy} image(s) sans lazy loading — ralentit le chargement initial` });
 
               // Sort: errors first, then warns
               allTodos.sort((a, b) => (a.type === 'error' ? -1 : 1) - (b.type === 'error' ? -1 : 1));
@@ -324,8 +325,8 @@ export default function AuditPage() {
                     <ul className="space-y-2">
                       {items.map((item, i) => (
                         <li key={i} className={`flex items-start gap-3 p-3.5 rounded-xl border ${cfg.bg} ${cfg.border}`}>
-                          <span className={`mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${cfg.badge}`}>
-                            {type === 'error' ? '✕' : '⚠'}
+                          <span className={`mt-0.5 p-1 rounded shrink-0 ${cfg.badge}`}>
+                            {type === 'error' ? <X className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
                           </span>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-[#171717] dark:text-[#ededed] leading-snug">{item.msg}</p>
@@ -362,7 +363,7 @@ export default function AuditPage() {
                         )}
                         {allTodos.length === 0 && (
                           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
-                            ✓ Aucun problème détecté
+                            <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Aucun problème détecté</span>
                           </span>
                         )}
                       </div>
@@ -385,7 +386,7 @@ export default function AuditPage() {
 
                   {allTodos.length === 0 ? (
                     <div className="text-center py-12 text-[#737373] dark:text-[#a3a3a3]">
-                      <p className="text-4xl mb-3">✓</p>
+                      <Check className="w-12 h-12 mx-auto mb-3 text-emerald-500" />
                       <p className="text-sm font-medium">Aucun problème critique détecté</p>
                       <p className="text-xs mt-1">Votre site semble bien optimisé sur les points analysés.</p>
                     </div>
@@ -697,7 +698,7 @@ export default function AuditPage() {
                               style={serpCopied ? { backgroundColor: '#10b981' } : { backgroundColor: ACCENT }}
                               className="absolute top-3 right-3 px-2.5 py-1 text-white text-[10px] font-semibold rounded transition-colors"
                             >
-                              {serpCopied ? '✓ Copié !' : 'Copier'}
+                              {serpCopied ? <><Check className="inline w-3 h-3 mr-0.5" />Copié</> : 'Copier'}
                             </button>
                           </div>
                         </div>
@@ -714,8 +715,8 @@ export default function AuditPage() {
                       ['og:description', result.seo.data.ogDescription || '—'],
                       ['og:image',       result.seo.data.ogImage || '—'],
                       ['og:type',        result.seo.extras?.ogType || '—'],
-                      ['twitter:card',   result.seo.data.hasTwitterCard ? result.seo.data.twitterCard || '✓' : '—'],
-                      ['structured data', result.seo.data.hasStructuredData ? '✓ JSON-LD présent' : '—'],
+                      ['twitter:card',   result.seo.data.hasTwitterCard ? result.seo.data.twitterCard || 'OK' : '—'],
+                      ['structured data', result.seo.data.hasStructuredData ? 'JSON-LD présent' : '—'],
                     ].map(([k, v]) => (
                       <div key={k} className="bg-[#fafafa] dark:bg-[#0a0a0a] rounded-lg p-2.5">
                         <p className="text-[10px] text-[#a3a3a3] mb-0.5 font-mono">{k}</p>
@@ -775,9 +776,9 @@ export default function AuditPage() {
                                 <span className="truncate block text-[#525252] dark:text-[#a3a3a3]">&ldquo;{img.alt.slice(0, 40)}&rdquo;</span>
                               )}
                             </td>
-                            <td className="px-3 py-2.5 text-center">{img.hasDimensions ? <span className="text-emerald-500">✓</span> : <span className="text-red-400">✕</span>}</td>
-                            <td className="px-3 py-2.5 text-center">{img.loading === 'lazy' ? <span className="text-emerald-500">✓</span> : <span className="text-[#a3a3a3]">—</span>}</td>
-                            <td className="px-3 py-2.5 text-center">{img.isNextGen ? <span className="text-emerald-500">✓</span> : <span className="text-[#a3a3a3]">—</span>}</td>
+                            <td className="px-3 py-2.5 text-center">{img.hasDimensions ? <Check className="w-3.5 h-3.5 text-emerald-500 mx-auto" /> : <X className="w-3.5 h-3.5 text-red-400 mx-auto" />}</td>
+                            <td className="px-3 py-2.5 text-center">{img.loading === 'lazy' ? <Check className="w-3.5 h-3.5 text-emerald-500 mx-auto" /> : <Minus className="w-3.5 h-3.5 text-[#a3a3a3] mx-auto" />}</td>
+                            <td className="px-3 py-2.5 text-center">{img.isNextGen ? <Check className="w-3.5 h-3.5 text-emerald-500 mx-auto" /> : <Minus className="w-3.5 h-3.5 text-[#a3a3a3] mx-auto" />}</td>
                             <td className="px-4 py-2.5">
                               {img.issues.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
@@ -785,7 +786,7 @@ export default function AuditPage() {
                                     <span key={issue} className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px]">{issue}</span>
                                   ))}
                                 </div>
-                              ) : <span className="text-emerald-500 text-[10px]">✓ OK</span>}
+                              ) : <span className="text-emerald-500 flex items-center gap-0.5 text-[10px]"><Check className="w-3 h-3" />OK</span>}
                             </td>
                           </tr>
                         ))}

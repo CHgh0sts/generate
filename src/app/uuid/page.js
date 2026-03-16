@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check, ArrowRight } from 'lucide-react';
 
 const ACCENT = '#a855f7';
 
@@ -102,7 +103,7 @@ export default function UuidPage() {
               Générer
             </button>
             <button onClick={copyAll} style={copied === 'all' ? { backgroundColor: '#10b981' } : {}} className={`px-4 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${copied === 'all' ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-              {copied === 'all' ? '✓ Copié' : 'Tout copier'}
+              {copied === 'all' ? <><Check className="inline w-3 h-3 mr-0.5" />Copié</> : 'Tout copier'}
             </button>
           </div>
           <div className="space-y-1.5 max-h-72 overflow-y-auto">
@@ -112,7 +113,7 @@ export default function UuidPage() {
                 <code className="flex-1 text-xs font-mono text-[#171717] dark:text-[#ededed] break-all">{id}</code>
                 <button onClick={() => copy(id, `u${i}`)} style={copied === `u${i}` ? { color: '#10b981' } : { color: ACCENT }}
                   className="text-[10px] font-semibold shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {copied === `u${i}` ? '✓' : 'Copier'}
+                  {copied === `u${i}` ? <Check className="w-3 h-3" /> : 'Copier'}
                 </button>
               </div>
             ))}
@@ -121,10 +122,10 @@ export default function UuidPage() {
 
         {/* Timestamp converter */}
         <div className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-5 space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#737373] dark:text-[#a3a3a3]">Convertisseur Timestamp ↔ Date</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#737373] dark:text-[#a3a3a3] flex items-center gap-1">Convertisseur Timestamp <ArrowRight className="w-3 h-3" /> Date</p>
           <div className="grid sm:grid-cols-2 gap-5">
             <div className="space-y-3">
-              <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] font-medium">Timestamp UNIX → Date humaine</label>
+              <label className="flex items-center gap-1 text-xs text-[#737373] dark:text-[#a3a3a3] font-medium">Timestamp UNIX <ArrowRight className="w-3 h-3" /> Date humaine</label>
               <div className="flex gap-2">
                 <input value={tsInput} onChange={e => setTsInput(e.target.value)} placeholder="ex: 1700000000"
                   className="flex-1 px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-sm bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] font-mono focus:outline-none" />
@@ -154,7 +155,7 @@ export default function UuidPage() {
               )}
             </div>
             <div className="space-y-3">
-              <label className="block text-xs text-[#737373] dark:text-[#a3a3a3] font-medium">Date → Timestamp UNIX</label>
+              <label className="flex items-center gap-1 text-xs text-[#737373] dark:text-[#a3a3a3] font-medium">Date <ArrowRight className="w-3 h-3" /> Timestamp UNIX</label>
               <input type="datetime-local" value={dateInput} onChange={e => setDateInput(e.target.value)}
                 className="w-full px-3 py-2 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-sm bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none" />
               {!isNaN(dateToTs) && (
@@ -168,7 +169,7 @@ export default function UuidPage() {
                       <div className="flex items-center gap-2">
                         <code className="font-mono text-[#171717] dark:text-[#ededed]">{val}</code>
                         <button onClick={() => copy(val, `d${lbl}`)} style={{ color: copied === `d${lbl}` ? '#10b981' : ACCENT }} className="font-semibold text-[10px]">
-                          {copied === `d${lbl}` ? '✓' : 'Copier'}
+                          {copied === `d${lbl}` ? <Check className="w-3 h-3" /> : 'Copier'}
                         </button>
                       </div>
                     </div>

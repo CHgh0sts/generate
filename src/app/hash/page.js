@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import { Check } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 
 const ACCENT = '#84cc16';
@@ -120,7 +121,7 @@ export default function HashPage() {
                   style={copied === h.id ? { backgroundColor: '#10b981' } : { backgroundColor: ACCENT }}
                   className="px-2.5 py-1 text-white text-[10px] font-semibold rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  {copied === h.id ? '✓ Copié' : 'Copier'}
+                  {copied === h.id ? <><Check className="inline w-3 h-3 mr-0.5" />Copié</> : 'Copier'}
                 </button>
               </div>
               <code className={`block text-xs font-mono break-all leading-relaxed ${h.value ? 'text-[#171717] dark:text-[#ededed]' : 'text-[#a3a3a3]'}`}>
