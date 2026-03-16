@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { RotateCw } from 'lucide-react';
+import { RotateCw, FlipHorizontal, FlipVertical } from 'lucide-react';
 import { Modal } from '../Modal';
 
 const ACCENT = '#059669';
@@ -70,11 +70,16 @@ export default function ResizePage() {
     const targetW = Math.max(1, parseInt(width)  || img.naturalWidth);
     const targetH = Math.max(1, parseInt(height) || img.naturalHeight);
 
+    // For 90°/270°, the output logical dimensions swap (width ↔ height)
+    const isSwapped = rotate === 90 || rotate === 270;
+    const logicalW  = isSwapped ? targetH : targetW;
+    const logicalH  = isSwapped ? targetW : targetH;
+
     // Scale canvas to fit preview box (max 420×360)
     const maxW = 420, maxH = 360;
-    const scale  = Math.min(maxW / targetW, maxH / targetH, 1);
-    const dispW  = Math.max(1, Math.round(targetW * scale));
-    const dispH  = Math.max(1, Math.round(targetH * scale));
+    const scale = Math.min(maxW / logicalW, maxH / logicalH, 1);
+    const dispW = Math.max(1, Math.round(logicalW * scale));
+    const dispH = Math.max(1, Math.round(logicalH * scale));
 
     canvas.width  = dispW;
     canvas.height = dispH;
@@ -85,30 +90,40 @@ export default function ResizePage() {
     const origW = img.naturalWidth;
     const origH = img.naturalHeight;
 
+    // Pre-rotation drawing space dimensions
+    const preW = isSwapped ? dispH : dispW;
+    const preH = isSwapped ? dispW : dispH;
+
+    ctx.save();
+    // Move origin to canvas centre
+    ctx.translate(dispW / 2, dispH / 2);
+    // Apply rotation
+    ctx.rotate((rotate * Math.PI) / 180);
+    // Apply flips AFTER rotation so axes are consistent with visual output
+    if (flipH) ctx.scale(-1,  1);
+    if (flipV) ctx.scale( 1, -1);
+
     if (fit === 'fill') {
-      // Stretch exactly
-      ctx.drawImage(img, 0, 0, dispW, dispH);
+      ctx.drawImage(img, -preW / 2, -preH / 2, preW, preH);
 
     } else if (fit === 'inside') {
-      // Contain — fit inside, letterbox / pillarbox
-      const s  = Math.min(dispW / origW, dispH / origH);
+      const s  = Math.min(preW / origW, preH / origH);
       const dw = origW * s, dh = origH * s;
-      const dx = (dispW - dw) / 2, dy = (dispH - dh) / 2;
-      ctx.drawImage(img, dx, dy, dw, dh);
+      ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
 
     } else if (fit === 'cover') {
-      // Cover — fill and clip excess
-      const s  = Math.max(dispW / origW, dispH / origH);
+      const s  = Math.max(preW / origW, preH / origH);
       const dw = origW * s, dh = origH * s;
-      const dx = (dispW - dw) / 2, dy = (dispH - dh) / 2;
       ctx.save();
       ctx.beginPath();
-      ctx.rect(0, 0, dispW, dispH);
+      ctx.rect(-preW / 2, -preH / 2, preW, preH);
       ctx.clip();
-      ctx.drawImage(img, dx, dy, dw, dh);
+      ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
       ctx.restore();
     }
-  }, [width, height, fit]);
+
+    ctx.restore();
+  }, [width, height, fit, rotate, flipH, flipV]);
 
   // Load image into ref when preview changes
   useEffect(() => {
@@ -123,7 +138,7 @@ export default function ResizePage() {
     if (!imgRef.current) return;
     const t = setTimeout(drawPreview, 80);
     return () => clearTimeout(t);
-  }, [width, height, fit, drawPreview]);
+  }, [width, height, fit, rotate, flipH, flipV, drawPreview]);
 
   // ── File handling ─────────────────────────────────────────────
   const handleFileChange = (e) => {
@@ -348,13 +363,13 @@ export default function ResizePage() {
                 <div className="h-px w-px self-stretch" />
                 <button onClick={() => setFlipH(!flipH)}
                   style={flipH ? { backgroundColor: ACCENT } : {}}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flipH ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-                  ⇔ Miroir H
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flipH ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
+                  <FlipHorizontal className="w-3.5 h-3.5" /> Miroir H
                 </button>
                 <button onClick={() => setFlipV(!flipV)}
                   style={flipV ? { backgroundColor: ACCENT } : {}}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flipV ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
-                  ⇕ Miroir V
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${flipV ? 'text-white border-transparent' : 'border-[#e5e5e5] dark:border-[#262626] text-[#525252] dark:text-[#a3a3a3]'}`}>
+                  <FlipVertical className="w-3.5 h-3.5" /> Miroir V
                 </button>
               </div>
             </div>
