@@ -68,24 +68,24 @@ export function HomeSearch({ groups }) {
       {/* Search + category bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search input */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a3a3a3] pointer-events-none" />
+        <div className="flex flex-1 items-center gap-2 border border-[#e5e5e5] dark:border-[#262626] rounded-xl bg-white dark:bg-[#171717] px-3 focus-within:ring-2 focus-within:ring-[#171717]/10 dark:focus-within:ring-[#ededed]/10 transition-shadow">
+          <Search className="w-4 h-4 text-[#a3a3a3] shrink-0 pointer-events-none" />
           <input
             ref={inputRef}
             type="search"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={`Rechercher parmi ${totalTools} outils…`}
-            className="w-full pl-11 pr-10 py-2.5 border border-[#e5e5e5] dark:border-[#262626] rounded-xl bg-white dark:bg-[#171717] text-[#171717] dark:text-[#ededed] text-sm placeholder:text-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#171717]/10 dark:focus:ring-[#ededed]/10 transition-shadow"
+            className="flex-1 py-2.5 bg-transparent text-sm text-[#171717] dark:text-[#ededed] placeholder:text-[#a3a3a3] focus:outline-none"
             aria-label="Rechercher un outil"
           />
           {query ? (
             <button onClick={() => setQuery('')} aria-label="Effacer"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a3a3a3] hover:text-[#525252] dark:hover:text-[#d4d4d4]">
+              className="text-[#a3a3a3] hover:text-[#525252] dark:hover:text-[#d4d4d4] shrink-0">
               <X className="w-4 h-4" />
             </button>
           ) : (
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#a3a3a3] border border-[#e5e5e5] dark:border-[#404040] rounded px-1 hidden sm:block">/</kbd>
+            <kbd className="text-[10px] text-[#a3a3a3] border border-[#e5e5e5] dark:border-[#404040] rounded px-1 hidden sm:block shrink-0">/</kbd>
           )}
         </div>
 
