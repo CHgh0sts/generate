@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Upload, Copy, Check, Download, RefreshCw, X } from 'lucide-react';
+import { Upload, Copy, Check, Download, RefreshCw, X, ExternalLink } from 'lucide-react';
 import { useToast } from '../Toast';
 
 const ACCENT = '#0284c7';
@@ -148,13 +148,17 @@ export default function OcrPage() {
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#f5f5f5] dark:border-[#1a1a1a]">
               <span className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3]">Texte extrait</span>
               {text && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <button onClick={copy} className="flex items-center gap-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded px-2 py-1 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
                     {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />} Copier
                   </button>
                   <button onClick={download} className="flex items-center gap-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded px-2 py-1 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
                     <Download className="w-3 h-3" /> .txt
                   </button>
+                  <Link href="/text" onClick={() => { try { sessionStorage.setItem('text_from_ocr', text); } catch {} }}
+                    className="flex items-center gap-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded px-2 py-1 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
+                    <ExternalLink className="w-3 h-3" /> Outils texte
+                  </Link>
                 </div>
               )}
             </div>

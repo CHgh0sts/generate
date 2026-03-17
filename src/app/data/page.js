@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import Papa from 'papaparse';
@@ -82,10 +82,23 @@ function xmlToJson(xmlStr) {
   return nodeToObj(doc.documentElement);
 }
 
+const DATA_FROM_JSON_KEY = 'data_from_json';
+
 export default function DataPage() {
   const [input, setInput]       = useState('');
   const [from, setFrom]         = useState('auto');
   const [to, setTo]             = useState('json');
+
+  useEffect(() => {
+    try {
+      const fromJson = sessionStorage.getItem(DATA_FROM_JSON_KEY);
+      if (fromJson) {
+        setInput(fromJson);
+        setFrom('json');
+        sessionStorage.removeItem(DATA_FROM_JSON_KEY);
+      }
+    } catch {}
+  }, []);
   const [copied, setCopied]     = useState(false);
   const [delimiter, setDelimiter] = useState(',');
   const [header, setHeader]     = useState(true);

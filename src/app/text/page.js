@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { Check } from 'lucide-react';
@@ -134,6 +134,8 @@ function DiffLine({ line }) {
   );
 }
 
+const TEXT_FROM_OCR_KEY = 'text_from_ocr';
+
 export default function TextPage() {
   const [tab, setTab]       = useState('lorem');
   const [loremType, setLoremType] = useState('paragraphs');
@@ -143,6 +145,17 @@ export default function TextPage() {
   const [diffA, setDiffA]   = useState('');
   const [diffB, setDiffB]   = useState('');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    try {
+      const fromOcr = sessionStorage.getItem(TEXT_FROM_OCR_KEY);
+      if (fromOcr) {
+        setCountText(fromOcr);
+        setTab('count');
+        sessionStorage.removeItem(TEXT_FROM_OCR_KEY);
+      }
+    } catch {}
+  }, []);
 
   const stats = useMemo(() => textStats(countText), [countText]);
   const diff  = useMemo(() => diffA || diffB ? computeDiff(diffA, diffB) : [], [diffA, diffB]);

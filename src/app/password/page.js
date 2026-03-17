@@ -309,7 +309,7 @@ export default function PasswordPage() {
               <li key={idx} className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#171717] group hover:bg-[#fafafa] dark:hover:bg-[#1a1a1a]">
                 <span className="text-xs text-[#a3a3a3] tabular-nums w-5 shrink-0">{idx + 1}</span>
                 <code className="text-sm font-mono text-[#171717] dark:text-[#ededed] break-all flex-1">{pwd}</code>
-                <a href={`/generate?text=${encodeURIComponent(pwd)}&type=qr`} target="_blank" rel="noopener noreferrer"
+                <a href={`/generate?value=${encodeURIComponent(pwd)}&type=qrcode`} target="_blank" rel="noopener noreferrer"
                   className="shrink-0 text-[10px] text-[#737373] hover:text-[#525252] opacity-0 group-hover:opacity-100 transition-all px-1.5 py-1 rounded-md hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
                   QR
                 </a>

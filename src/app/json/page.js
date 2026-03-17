@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Check, X, Download } from 'lucide-react';
+import { Check, X, Download, ExternalLink } from 'lucide-react';
 import { useToast } from '../Toast';
 
 const ACCENT = '#16a34a';
@@ -159,16 +159,22 @@ export default function JsonPage() {
                 <span className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3]">Minifié</span>
                 <div className="flex gap-2">
                   {parsed.ok && parsed.data && (
-                    <button onClick={() => {
-                      try {
-                        const csv = jsonToCsv(parsed.data);
-                        const blob = new Blob([csv], { type: 'text/csv' });
-                        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'export.csv'; a.click();
-                        pushToast?.('CSV exporté !');
-                      } catch(e) { pushToast?.(e.message, 'error'); }
-                    }} className="flex items-center gap-1 px-2 py-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded-md text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
-                      <Download className="w-3 h-3" /> CSV
-                    </button>
+                    <>
+                      <Link href="/data" onClick={() => { try { sessionStorage.setItem('data_from_json', input); } catch {} }}
+                        className="flex items-center gap-1 px-2 py-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded-md text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
+                        <ExternalLink className="w-3 h-3" /> Convertir
+                      </Link>
+                      <button onClick={() => {
+                        try {
+                          const csv = jsonToCsv(parsed.data);
+                          const blob = new Blob([csv], { type: 'text/csv' });
+                          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'export.csv'; a.click();
+                          pushToast?.('CSV exporté !');
+                        } catch(e) { pushToast?.(e.message, 'error'); }
+                      }} className="flex items-center gap-1 px-2 py-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded-md text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
+                        <Download className="w-3 h-3" /> CSV
+                      </button>
+                    </>
                   )}
                   <button onClick={() => minified && copy(minified, 'min')} style={copied==='min'?{backgroundColor:'#10b981'}:{backgroundColor:ACCENT}} className="px-2 py-1 text-white text-[10px] font-semibold rounded-md">
                     {copied==='min'?<Check className="inline w-3 h-3" />:'Copier'}

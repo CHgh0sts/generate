@@ -2,13 +2,68 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Upload, Camera, X, Copy, Check, AlertTriangle, QrCode } from 'lucide-react';
+import { Upload, Camera, X, Copy, Check, AlertTriangle, QrCode, ExternalLink } from 'lucide-react';
 import { useToast } from '../Toast';
 
 const ACCENT = '#06b6d4';
 
+const FORMAT_LABELS = {
+  QR_CODE: 'QR Code',
+  DATA_MATRIX: 'Data Matrix',
+  CODE_128: 'Code 128',
+  CODE_39: 'Code 39',
+  EAN_13: 'EAN-13',
+  EAN_8: 'EAN-8',
+  UPC_A: 'UPC-A',
+  UPC_E: 'UPC-E',
+  CODABAR: 'Codabar',
+  ITF: 'ITF',
+  PDF_417: 'PDF417',
+  AZTEC: 'Aztec',
+};
+
+async function decodeWithZxing(imageData) {
+  const { BinaryBitmap, HybridBinarizer, RGBLuminanceSource, MultiFormatReader, BarcodeFormat, DecodeHintType, NotFoundException } = await import('@zxing/library');
+  const { data, width, height } = imageData;
+  const luminances = new Uint8ClampedArray(width * height);
+  for (let i = 0; i < width * height; i++) {
+    const r = data[i * 4], g = data[i * 4 + 1], b = data[i * 4 + 2];
+    luminances[i] = ((r + g * 2 + b) / 4) & 0xff;
+  }
+  const source = new RGBLuminanceSource(luminances, width, height);
+  const bitmap = new BinaryBitmap(new HybridBinarizer(source));
+  const reader = new MultiFormatReader();
+  const hints = new Map();
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+    BarcodeFormat.QR_CODE, BarcodeFormat.DATA_MATRIX,
+    BarcodeFormat.CODE_128, BarcodeFormat.CODE_39, BarcodeFormat.CODE_93,
+    BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E,
+    BarcodeFormat.CODABAR, BarcodeFormat.ITF, BarcodeFormat.PDF_417, BarcodeFormat.AZTEC,
+  ]);
+  try {
+    const result = reader.decode(bitmap, hints);
+    const fmt = result.getBarcodeFormat();
+    const fmtName = typeof fmt === 'number' ? BarcodeFormat[fmt] : fmt;
+    return { data: result.getText(), format: fmtName };
+  } catch (e) {
+    if (e.name === 'NotFoundException' || e.constructor?.name === 'NotFoundException') return null;
+    throw e;
+  }
+}
+
+async function decodeFromCanvas(canvas) {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const zxingResult = await decodeWithZxing(imageData);
+  if (zxingResult) return zxingResult;
+  const jsQR = (await import('jsqr')).default;
+  const qr = jsQR(imageData.data, imageData.width, imageData.height);
+  return qr ? { data: qr.data, format: 'QR_CODE' } : null;
+}
+
 export default function QrReaderPage() {
   const [result, setResult]   = useState(null);
+  const [format, setFormat]   = useState(null);
   const [error, setError]     = useState('');
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,22 +78,17 @@ export default function QrReaderPage() {
   const rafRef     = useRef(null);
   const pushToast  = useToast();
 
-  async function decodeFromCanvas(canvas) {
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const jsQR = (await import('jsqr')).default;
-    return jsQR(data, width, height);
-  }
-
   function processResult(code) {
     if (code?.data) {
       setResult(code.data);
+      setFormat(code.format || 'QR_CODE');
       setError('');
-      setHistory(h => [code.data, ...h.filter(x => x !== code.data)].slice(0, 10));
-      pushToast?.('QR code décodé !');
+      setHistory(h => [{ data: code.data, format: code.format || 'QR_CODE' }, ...h.filter(x => x.data !== code.data)].slice(0, 10));
+      pushToast?.('Code décodé !');
     } else {
       setResult(null);
-      setError('Aucun QR code détecté dans cette image.');
+      setFormat(null);
+      setError('Aucun QR code, Data Matrix ou code-barres détecté dans cette image.');
     }
   }
 
@@ -130,8 +180,8 @@ export default function QrReaderPage() {
             </Link>
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ACCENT }} />
             <div>
-              <h1 className="text-base font-semibold text-[#171717] dark:text-[#ededed]">Lecteur QR Code</h1>
-              <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">Décodez un QR code depuis une image ou la caméra</p>
+              <h1 className="text-base font-semibold text-[#171717] dark:text-[#ededed]">Lecteur QR Code, Data Matrix & codes-barres</h1>
+              <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">QR Code, Data Matrix, Code 128, EAN, UPC… image ou caméra</p>
             </div>
           </div>
           <ThemeToggle />
@@ -189,13 +239,18 @@ export default function QrReaderPage() {
 
         {/* Result */}
         {loading && (
-          <div className="text-center text-sm text-[#a3a3a3] py-4">Lecture du QR code…</div>
+          <div className="text-center text-sm text-[#a3a3a3] py-4">Lecture du code…</div>
         )}
 
         {result && (
           <div className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-5 space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-semibold uppercase tracking-wider text-[#737373] dark:text-[#a3a3a3]">Résultat</span>
+              {format && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0" style={{ backgroundColor: ACCENT + '20', color: ACCENT }}>
+                  {FORMAT_LABELS[format] || format}
+                </span>
+              )}
               <span className="ml-auto flex gap-2">
                 <button onClick={copy} className="flex items-center gap-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded px-2 py-1 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
                   {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />} Copier
@@ -206,6 +261,10 @@ export default function QrReaderPage() {
                     Ouvrir
                   </a>
                 )}
+                <Link href={`/generate?value=${encodeURIComponent(result)}&type=${({ DATA_MATRIX:'datamatrix', CODE_128:'code128', CODE_39:'code39', EAN_13:'ean13', EAN_8:'ean8', UPC_A:'upc', UPC_E:'upc' })[format] || 'qrcode'}`}
+                  className="flex items-center gap-1 text-[10px] border border-[#e5e5e5] dark:border-[#262626] rounded px-2 py-1 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
+                  <ExternalLink className="w-3 h-3" /> Générer
+                </Link>
               </span>
             </div>
             <div className="font-mono text-sm text-[#171717] dark:text-[#ededed] break-all bg-[#fafafa] dark:bg-[#0a0a0a] rounded-lg p-3">
@@ -230,16 +289,21 @@ export default function QrReaderPage() {
           <div className="bg-white dark:bg-[#171717] rounded-xl border border-[#e5e5e5] dark:border-[#262626] p-4">
             <p className="text-xs font-semibold text-[#737373] dark:text-[#a3a3a3] mb-3">Historique</p>
             <ul className="space-y-1">
-              {history.slice(1).map((h, i) => (
-                <li key={i} className="flex items-center gap-2 text-xs text-[#525252] dark:text-[#a3a3a3]">
-                  <QrCode className="w-3 h-3 shrink-0 text-[#a3a3a3]" />
-                  <span className="flex-1 font-mono truncate">{h}</span>
-                  <button onClick={() => { navigator.clipboard.writeText(h); pushToast?.('Copié !'); }}
-                    className="text-[#a3a3a3] hover:text-[#525252] shrink-0">
-                    <Copy className="w-3 h-3" />
-                  </button>
-                </li>
-              ))}
+              {history.slice(1).map((h, i) => {
+                const data = typeof h === 'string' ? h : h?.data;
+                const fmt = typeof h === 'object' && h?.format ? FORMAT_LABELS[h.format] : null;
+                return data ? (
+                  <li key={i} className="flex items-center gap-2 text-xs text-[#525252] dark:text-[#a3a3a3]">
+                    <QrCode className="w-3 h-3 shrink-0 text-[#a3a3a3]" />
+                    {fmt && <span className="text-[10px] shrink-0 opacity-70">{fmt}</span>}
+                    <span className="flex-1 font-mono truncate">{data}</span>
+                    <button onClick={() => { navigator.clipboard.writeText(data); pushToast?.('Copié !'); }}
+                      className="text-[#a3a3a3] hover:text-[#525252] shrink-0">
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </li>
+                ) : null;
+              })}
             </ul>
           </div>
         )}

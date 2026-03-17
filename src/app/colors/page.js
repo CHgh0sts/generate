@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { Check, X } from 'lucide-react';
@@ -75,6 +75,12 @@ function generateHarmony(hex, type) {
 export default function ColorsPage() {
   const [tab, setTab]       = useState('convert');
   const [hex, setHex]       = useState('#e11d48');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const h = new URLSearchParams(window.location.search).get('hex');
+    if (h && /^#[0-9a-fA-F]{6}$/.test(h)) setHex(h);
+  }, []);
   const [copied, setCopied] = useState('');
   // Gradient
   const [gColors, setGColors] = useState(['#e11d48','#7c3aed']);

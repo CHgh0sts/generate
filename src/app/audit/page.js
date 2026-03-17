@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { Check, X, AlertTriangle, Zap, Search, Accessibility, Lock, Image as ImageIcon, ClipboardList, Minus } from 'lucide-react';
@@ -105,6 +105,12 @@ const TYPE_COLORS = { html: '#2563eb', css: '#7c3aed', js: '#f59e0b', image: '#1
 
 export default function AuditPage() {
   const [url, setUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const u = new URLSearchParams(window.location.search).get('url');
+    if (u) setUrl(u);
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);

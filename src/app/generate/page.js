@@ -63,6 +63,20 @@ export default function GeneratePage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const v = sp.get('value');
+    const t = sp.get('type');
+    if (v || t) {
+      setParams(prev => ({
+        ...prev,
+        ...(v != null && { value: v }),
+        ...(t && ['qrcode','datamatrix','code128','code39','ean13','ean8','upc'].includes(t) && { type: t }),
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
     const urlParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -130,7 +144,12 @@ export default function GeneratePage() {
               <p className="text-xs text-[#737373] dark:text-[#a3a3a3] truncate">QR Code, codes-barres, Data Matrix</p>
             </div>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <Link href="/qr-reader" className="text-xs px-3 py-1.5 border border-[#e5e5e5] dark:border-[#262626] rounded-lg text-[#737373] dark:text-[#a3a3a3] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]">
+              Lire un code
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

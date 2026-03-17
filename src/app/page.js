@@ -68,7 +68,7 @@ const groups = [
     tools: [
       { href: '/currency',  color: '#16a34a', title: 'Convertisseur de devises',         description: 'Plus de 30 devises · Taux BCE en temps réel · EUR, USD, GBP, MAD…' },
       { href: '/generate',  color: '#7c3aed', title: 'Générateur QR Code / Data Matrix', description: 'QR codes, codes-barres (Code 128, EAN, UPC) et Data Matrix. Export PNG/SVG.' },
-      { href: '/qr-reader', color: '#06b6d4', title: 'Lecteur QR Code',                  description: 'Décodez un QR code depuis une image ou la caméra en temps réel.' },
+      { href: '/qr-reader', color: '#06b6d4', title: 'Lecteur QR Code, Data Matrix & codes-barres', description: 'Décodez QR, Data Matrix, Code 128, EAN, UPC… image ou caméra.' },
       { href: '/ip',        color: '#0ea5e9', title: 'Infos IP / Domaine',               description: "Géolocalisation, ASN, DNS, rDNS et informations réseau d'une IP ou domaine." },
       { href: '/password',  color: '#ef4444', title: 'Générateur de mots de passe',      description: 'Mot de passe & passphrase, historique local, indicateur de force.' },
       { href: '/base64',    color: '#f59e0b', title: 'Encodeur / Décodeur Base64',        description: 'Encodez ou décodez texte et fichiers en Base64 / Data URI.' },

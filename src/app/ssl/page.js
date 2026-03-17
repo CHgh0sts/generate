@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Search, Shield, ShieldAlert, ShieldCheck, ShieldX, RefreshCw, Copy } from 'lucide-react';
+import { Search, Shield, ShieldAlert, ShieldCheck, ShieldX, RefreshCw, Copy, ExternalLink } from 'lucide-react';
 import { useToast } from '../Toast';
 
 const ACCENT = '#16a34a';
@@ -113,7 +113,7 @@ export default function SslPage() {
         {result && (
           <div className="space-y-4">
             {/* Status card */}
-            <div className="rounded-xl border p-5 flex items-center gap-4"
+            <div className="rounded-xl border p-5 flex items-center gap-4 relative"
               style={{ borderColor: statusColor + '40', backgroundColor: statusColor + '0d' }}>
               <StatusIcon className="w-10 h-10 shrink-0" style={{ color: statusColor }} />
               <div className="flex-1 min-w-0">
@@ -129,6 +129,10 @@ export default function SslPage() {
                 </div>
                 {result.daysLeft >= 0 && <div className="text-[10px] text-[#a3a3a3]">jours restants</div>}
               </div>
+              <Link href={`/audit?url=${encodeURIComponent('https://' + result.hostname)}`}
+                className="shrink-0 flex items-center gap-1 text-[10px] text-[#737373] hover:text-[#171717] dark:hover:text-[#ededed] border border-[#e5e5e5] dark:border-[#262626] rounded-lg px-2 py-1">
+                <ExternalLink className="w-3 h-3" /> Auditer
+              </Link>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">

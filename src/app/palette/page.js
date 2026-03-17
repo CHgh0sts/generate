@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
-import { Upload, Copy, Check, X } from 'lucide-react';
+import { Upload, Copy, Check, X, ExternalLink } from 'lucide-react';
 import { useToast } from '../Toast';
 
 const ACCENT = '#e11d48';
@@ -202,13 +202,21 @@ export default function PalettePage() {
 
             {palette.map((rgb, i) => {
               const val = formatColor(rgb);
+              const hexVal = toHex(rgb);
               return (
-                <button key={i} onClick={() => copy(val, i)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#e5e5e5] dark:border-[#262626] hover:shadow-sm transition-shadow bg-white dark:bg-[#171717]">
-                  <div className="w-8 h-8 rounded-lg shrink-0 border border-black/10" style={{ backgroundColor: toHex(rgb) }} />
-                  <code className="flex-1 text-xs font-mono text-left text-[#171717] dark:text-[#ededed]">{val}</code>
-                  {copied === i ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-[#a3a3a3]" />}
-                </button>
+                <div key={i} className="flex items-center gap-2">
+                  <button onClick={() => copy(val, i)}
+                    className="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl border border-[#e5e5e5] dark:border-[#262626] hover:shadow-sm transition-shadow bg-white dark:bg-[#171717]">
+                    <div className="w-8 h-8 rounded-lg shrink-0 border border-black/10" style={{ backgroundColor: hexVal }} />
+                    <code className="flex-1 text-xs font-mono text-left text-[#171717] dark:text-[#ededed]">{val}</code>
+                    {copied === i ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-[#a3a3a3]" />}
+                  </button>
+                  <Link href={`/colors?hex=${encodeURIComponent(hexVal)}`}
+                    className="shrink-0 p-2 rounded-lg border border-[#e5e5e5] dark:border-[#262626] text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]"
+                    title="Utiliser dans Outils couleurs">
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               );
             })}
 
