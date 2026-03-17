@@ -1,13 +1,28 @@
 import { NextResponse } from 'next/server';
+import dns from 'dns/promises';
 
 export const runtime = 'nodejs';
 
+function isIP(s) {
+  return /^[\d.]+$/.test(s) || /^[0-9a-fA-F:]+$/.test(s);
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get('q') || '';
+  let query = (searchParams.get('q') || '').trim();
+  const originalQuery = query;
 
   try {
-    // ipapi.co — free, reliable, HTTPS supported
+    // ipapi.co ne supporte pas la recherche par domaine (403) — on résout d'abord
+    if (query && !isIP(query)) {
+      try {
+        const addrs = await dns.resolve4(query);
+        if (addrs?.length) query = addrs[0];
+      } catch {
+        return NextResponse.json({ error: 'Impossible de résoudre ce domaine' }, { status: 404 });
+      }
+    }
+
     const endpoint = query
       ? `https://ipapi.co/${encodeURIComponent(query)}/json/`
       : `https://ipapi.co/json/`;
@@ -33,7 +48,7 @@ export async function GET(req) {
     const normalized = {
       ip:         data.ip,
       type:       data.version || (data.ip?.includes(':') ? 'IPv6' : 'IPv4'),
-      hostname:   data.hostname || null,
+      hostname:   data.hostname || (originalQuery && !isIP(originalQuery) ? originalQuery : null),
       city:       data.city,
       region:     data.region,
       country:    data.country_name,
