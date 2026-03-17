@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { RefreshCw, ArrowLeftRight, TrendingUp } from 'lucide-react';
 import { useToast } from '../Toast';
+import { useShowFlags } from '../useShowFlags';
 
 const ACCENT = '#16a34a';
 
@@ -25,6 +26,7 @@ export default function CurrencyPage() {
   const [updated, setUpdated] = useState('');
   const [currencies, setCurrencies] = useState([]);
   const pushToast = useToast();
+  const showFlags = useShowFlags();
 
   const fetchRates = useCallback(async (from = base) => {
     setLoading(true);
@@ -105,7 +107,7 @@ export default function CurrencyPage() {
                 className="w-full px-4 py-3 text-base border border-[#e5e5e5] dark:border-[#262626] rounded-xl bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2"
                 style={{ '--tw-ring-color': ACCENT }}>
                 {allCurrencies.map(c => (
-                  <option key={c} value={c}>{FLAGS[c] || ''} {c} — {NAMES[c] || c}</option>
+                  <option key={c} value={c}>{showFlags && FLAGS[c] ? FLAGS[c] + ' ' : ''}{c} — {NAMES[c] || c}</option>
                 ))}
               </select>
             </div>
@@ -134,7 +136,7 @@ export default function CurrencyPage() {
                 className="w-full px-4 py-3 text-base border border-[#e5e5e5] dark:border-[#262626] rounded-xl bg-[#fafafa] dark:bg-[#0a0a0a] text-[#171717] dark:text-[#ededed] focus:outline-none focus:ring-2"
                 style={{ '--tw-ring-color': ACCENT }}>
                 {allCurrencies.map(c => (
-                  <option key={c} value={c}>{FLAGS[c] || ''} {c} — {NAMES[c] || c}</option>
+                  <option key={c} value={c}>{showFlags && FLAGS[c] ? FLAGS[c] + ' ' : ''}{c} — {NAMES[c] || c}</option>
                 ))}
               </select>
             </div>
@@ -169,7 +171,7 @@ export default function CurrencyPage() {
                   style={target === c ? { borderColor: ACCENT, backgroundColor: ACCENT + '10' } : {}}>
                   <div>
                     <div className="text-xs text-[#737373] dark:text-[#a3a3a3] flex items-center gap-1">
-                      {FLAGS[c] || ''} {c}
+                      {showFlags && FLAGS[c] ? FLAGS[c] + ' ' : ''}{c}
                     </div>
                     <div className="text-sm font-bold text-[#171717] dark:text-[#ededed] mt-0.5">
                       {fmt(rates[c], 4)}

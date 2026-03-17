@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import { Search, Globe, Server, MapPin, Clock, Wifi, RefreshCw, Copy, Check } from 'lucide-react';
 import { useToast } from '../Toast';
+import { useShowFlags } from '../useShowFlags';
 
 const ACCENT = '#0ea5e9';
 
@@ -49,6 +50,7 @@ export default function IpPage() {
   const [error, setError]   = useState('');
   const [copied, setCopied] = useState('');
   const pushToast = useToast();
+  const showFlags = useShowFlags();
 
   const isIP = (s) => /^[\d.]+$/.test(s) || /^[0-9a-fA-F:]+$/.test(s);
 
@@ -173,7 +175,7 @@ export default function IpPage() {
               </div>
               <div className="p-4">
                 <div className="flex items-start gap-3 mb-3">
-                  {result.flag?.emoji && <span className="text-4xl">{result.flag.emoji}</span>}
+                  {showFlags && result.flag?.emoji && <span className="text-4xl">{result.flag.emoji}</span>}
                   <div className="flex-1 min-w-0">
                     <Row icon={MapPin} label="Pays" value={result.country && result.country_code ? `${result.country} (${result.country_code})` : result.country} color={ACCENT} />
                     <Row icon={MapPin} label="Région" value={result.region} color={ACCENT} />
