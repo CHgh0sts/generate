@@ -76,6 +76,7 @@ const groups = [
       { href: '/faker',     color: '#7c3aed', title: 'Données factices',                  description: 'Générez des données de test — noms, emails, adresses · JSON, CSV, SQL.' },
       { href: '/pwa',       color: '#0d9488', title: 'Générateur PWA',                    description: "Icônes, manifest, service worker et code d'intégration pour PWA." },
       { href: '/audit',     color: '#0ea5e9', title: 'Audit de performance web',          description: 'Vitesse, Core Web Vitals, SEO, images, accessibilité et ressources.' },
+      { href: '/security-audit', color: '#dc2626', title: 'Audit de sécurité web',          description: 'Crawl du site, découverte d\'URLs, tests SSL, headers, fichiers sensibles, rapport complet.' },
     ],
   },
 ];

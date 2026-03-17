@@ -129,10 +129,16 @@ export default function SslPage() {
                 </div>
                 {result.daysLeft >= 0 && <div className="text-[10px] text-[#a3a3a3]">jours restants</div>}
               </div>
-              <Link href={`/audit?url=${encodeURIComponent('https://' + result.hostname)}`}
-                className="shrink-0 flex items-center gap-1 text-[10px] text-[#737373] hover:text-[#171717] dark:hover:text-[#ededed] border border-[#e5e5e5] dark:border-[#262626] rounded-lg px-2 py-1">
-                <ExternalLink className="w-3 h-3" /> Auditer
-              </Link>
+              <div className="shrink-0 flex items-center gap-1">
+                <Link href={`/audit?url=${encodeURIComponent('https://' + result.hostname)}`}
+                  className="flex items-center gap-1 text-[10px] text-[#737373] hover:text-[#171717] dark:hover:text-[#ededed] border border-[#e5e5e5] dark:border-[#262626] rounded-lg px-2 py-1">
+                  <ExternalLink className="w-3 h-3" /> Perf
+                </Link>
+                <Link href={`/security-audit?url=${encodeURIComponent('https://' + result.hostname)}`}
+                  className="flex items-center gap-1 text-[10px] text-[#737373] hover:text-[#171717] dark:hover:text-[#ededed] border border-[#e5e5e5] dark:border-[#262626] rounded-lg px-2 py-1">
+                  <ExternalLink className="w-3 h-3" /> Sécurité
+                </Link>
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
